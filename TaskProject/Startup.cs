@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,8 +45,11 @@ namespace TaskProject
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TaskContext context)
+        // Added ILogger<Startup> to allow startup logging
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TaskContext context, ILogger<Startup> logger)
         {
+            logger.LogInformation("Application starting up");
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

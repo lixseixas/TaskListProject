@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,6 +8,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using TaskProject.Bl;
 using TaskProject.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace TaskProject.Controllers
 {
@@ -30,20 +30,30 @@ namespace TaskProject.Controllers
 
         public IActionResult List()
         {
-            List<TaskModel> taskList = new List<TaskModel>();
-
-            TasksDal taskDb = new TasksDal();
-            bool retorno = taskDb.GetTasks( ref taskList);
-
-            if (retorno == false)
+            try
             {
+                List<TaskModel> taskList = new List<TaskModel>();
+
+                TasksDal taskDb = new TasksDal();
+                bool retorno = taskDb.GetTasks(ref taskList);
+
+                if (retorno == false)
+                {
+                    return View("Error");
+                }
+
+                TaskListModel taskListModel = new TaskListModel();
+                taskListModel.TaskList = taskList;
+
+                return View("List", taskListModel);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception with the configured logging provider (log4net)
+                _logger.LogError(ex, "An error occurred while retrieving the task list in HomeController.List.");
+
                 return View("Error");
             }
-
-            TaskListModel taskListModel = new TaskListModel();
-            taskListModel.TaskList = taskList;
-
-            return View("List", taskListModel);
         }
 
         [HttpPost]
@@ -53,7 +63,6 @@ namespace TaskProject.Controllers
             {
                 return View(modelList);
             }
-           
 
             return List();
         }
@@ -70,11 +79,9 @@ namespace TaskProject.Controllers
             return View(pesquisaModel);
         }
 
-
         [HttpPost]
         public IActionResult ListHoursPerDay(SearchTaskModel taskModel)
         {
-
             List<SummarizedTasksModel> listaTasks = new List<SummarizedTasksModel>();
             TasksDal taskDb = new TasksDal();
             bool retorno = taskDb.GetSummarizedTasks(taskModel.InitialDate,
@@ -87,7 +94,6 @@ namespace TaskProject.Controllers
 
             taskModel.ListTasksSummarized = listaTasks;
             return Json(taskModel);
-
         }
 
         public IActionResult Include()
@@ -101,7 +107,6 @@ namespace TaskProject.Controllers
 
         bool ValidarTask(TaskModel taskModel, ref string errorMessage)
         {
-
             if (taskModel.InitialHour == taskModel.FinalHour)
             {
                 errorMessage = "The final hour and initial hour are the same.";
@@ -171,13 +176,12 @@ namespace TaskProject.Controllers
                 return View(taskModel);
             }
 
-
             taskModel.Id = Guid.NewGuid();
             taskModel.InitialHour = taskModel.Date.AddHours(taskModel.InitialHour.Hour).AddMinutes(taskModel.InitialHour.Minute);
-            taskModel.FinalHour = taskModel.Date.AddHours(taskModel.FinalHour.Hour).AddMinutes(taskModel.FinalHour.Minute); ;
+            taskModel.FinalHour = taskModel.Date.AddHours(taskModel.FinalHour.Hour).AddMinutes(taskModel.FinalHour.Minute);
 
             TasksDal taskDb = new TasksDal();
-            bool retorno = taskDb.AddTask( taskModel);
+            bool retorno = taskDb.AddTask(taskModel);
 
             if (retorno == false)
             {
@@ -202,7 +206,6 @@ namespace TaskProject.Controllers
             return View("Include", taskModel);
         }
 
-
         [HttpPost]
         public IActionResult Edit(TaskModel taskModel)
         {
@@ -219,14 +222,13 @@ namespace TaskProject.Controllers
                 return View("Include", taskModel);
             }
 
-
             taskModel.Inclusion = "edit";
             TasksDal taskDb = new TasksDal();
 
             taskModel.InitialHour = taskModel.Date.AddHours(taskModel.InitialHour.Hour).AddMinutes(taskModel.InitialHour.Minute);
-            taskModel.FinalHour = taskModel.Date.AddHours(taskModel.FinalHour.Hour).AddMinutes(taskModel.FinalHour.Minute); ;
+            taskModel.FinalHour = taskModel.Date.AddHours(taskModel.FinalHour.Hour).AddMinutes(taskModel.FinalHour.Minute);
 
-            bool retorno = taskDb.AddTask( taskModel);
+            bool retorno = taskDb.AddTask(taskModel);
             if (retorno == false)
             {
                 return View("Error");
@@ -235,10 +237,9 @@ namespace TaskProject.Controllers
             return List();
         }
 
-
         public IActionResult TestAspNetFunctions()
         {
-            TestAspNetFunctionsModel taskModel = new TestAspNetFunctionsModel();           
+            TestAspNetFunctionsModel taskModel = new TestAspNetFunctionsModel();
             return View(taskModel);
         }
 
@@ -248,25 +249,21 @@ namespace TaskProject.Controllers
             if (!ModelState.IsValid)
             {
                 return View(taskModel);
-            }                       
+            }
 
-            if (!string.IsNullOrWhiteSpace(taskModel.InputA)  && !string.IsNullOrWhiteSpace(taskModel.InputB) )
+            if (!string.IsNullOrWhiteSpace(taskModel.InputA) && !string.IsNullOrWhiteSpace(taskModel.InputB))
             {
                 taskModel.OutPut = taskModel.InputA + taskModel.InputB;
-               // return View(taskModel);
                 return View("TestAspNetFunctions", taskModel);
             }
-                                  
 
             return List();
         }
-
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-
     }
 }

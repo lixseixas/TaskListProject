@@ -13,11 +13,13 @@ namespace TaskProject.Bl
         {
         }       
 
-        public DbSet<TaskModel> Tasks { get; set; }      
+        public DbSet<TaskModel> Tasks { get; set; }
+        public DbSet<UserLoginModel> UserLogins { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<TaskModel>().ToTable("Tasks");            
+            modelBuilder.Entity<TaskModel>().ToTable("Tasks");
+            modelBuilder.Entity<UserLoginModel>().ToTable("UserLogin");
         }
     }
 }

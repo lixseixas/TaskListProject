@@ -9,9 +9,14 @@ using System.Threading.Tasks;
 using TaskProject.Bl;
 using TaskProject.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace TaskProject.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -23,6 +28,7 @@ namespace TaskProject.Controllers
             _context = context;
         }
 
+        [AllowAnonymous]
         public IActionResult Index()
         {
             return View();
@@ -191,17 +197,17 @@ namespace TaskProject.Controllers
             return List();
         }
 
+        [AllowAnonymous]
         public IActionResult UserLogin()
         {
             UserLoginModel taskModel = new UserLoginModel();
             taskModel.Id = Guid.NewGuid();
-            //taskModel.Date = DateTime.Now;
-            //taskModel.Priority = 1;
             return View(taskModel);
         }
 
         [HttpPost]
-        public IActionResult UserLogin(UserLoginModel userModel)
+        [AllowAnonymous]
+        public async Task<IActionResult> UserLogin(UserLoginModel userModel)
         {
             if (!ModelState.IsValid)
             {
@@ -209,22 +215,23 @@ namespace TaskProject.Controllers
             }                              
           
             TasksDal taskDb = new TasksDal();
-            bool retorno = taskDb.GetUserPassword(userModel.User, ref userModel);
+            var token = taskDb.GetUserPassword(userModel.User, userModel.Password);
 
-            if (retorno == false)
+            if (string.IsNullOrEmpty(token))
             {
-                return View("Error");
-            }
-            else
-            {
-                if (userModel.Password != userModel.Password)
-                {
-                    ModelState.AddModelError("", "Invalid password.");
-                    return View(userModel);
-                }
+                ModelState.AddModelError("", "Invalid username or password.");
+                return View(userModel);
             }
 
+            // Create claims and sign in with cookie authentication so controller actions can use identity.
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, userModel.User),
+                new Claim("JWT", token)
+            };
 
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
             return List();
         }
@@ -298,6 +305,7 @@ namespace TaskProject.Controllers
             return List();
         }
 
+        [AllowAnonymous]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

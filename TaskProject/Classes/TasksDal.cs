@@ -7,6 +7,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using TaskProject.Models;
 using Microsoft.Extensions.Configuration;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace TaskProject.Bl
 {
@@ -96,8 +100,7 @@ namespace TaskProject.Bl
             {
 
                 return false;
-            }
-                        
+            }                         
 
         }
 
@@ -158,7 +161,6 @@ namespace TaskProject.Bl
 
         }
 
-
         public bool GetTask(Guid id, ref TaskModel taskModel)
         {
             var taskList = _context.Tasks.Where(p => p.Id == id).ToList();
@@ -176,22 +178,52 @@ namespace TaskProject.Bl
 
         }
 
-        public bool GetUserPassword(string userLogin, ref UserLoginModel userModel)
+        // Changed: returns JWT token string when credentials are valid; null otherwise.
+        public string GetUserPassword(string userLogin, string password)
         {
-            var userList = _context.UserLogins.Where(p => p.User == userLogin).ToList();
+            var user = _context.UserLogins.Where(p => p.User == userLogin).FirstOrDefault();
 
-            if (userList.Count > 0)
+            if (user == null)
             {
-                userModel = userList.FirstOrDefault();
-                return true;
+                return null;
             }
 
-            else
+            // Plain-text comparison (existing behavior). Replace with hashed compare in production.
+            if (user.Password != password)
             {
-                return false;
+                return null;
             }
 
+            // Read JWT settings from appsettings.json
+            var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+            var jwtSection = config.GetSection("Jwt");
+            var key = jwtSection["Key"];
+            var issuer = jwtSection["Issuer"];
+            var audience = jwtSection["Audience"];
+            if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(issuer) || string.IsNullOrWhiteSpace(audience))
+            {
+                throw new InvalidOperationException("JWT configuration (Jwt:Key / Issuer / Audience) missing in appsettings.json");
+            }
 
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.Name, user.User),
+                new Claim("UserId", user.Id.ToString())
+            };
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: issuer,
+                audience: audience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(1),
+                signingCredentials: credentials
+            );
+
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+            return tokenString;
         }
 
         public bool ValidateTaskSuperposition(Guid idAgendamento, DateTime data, DateTime dataInicial, DateTime dataFinal)

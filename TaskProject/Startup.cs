@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TaskProject.Bl;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace TaskProject
 {
@@ -28,10 +29,6 @@ namespace TaskProject
         {
             services.AddControllersWithViews();
 
-            // Add framework services.
-            //services.AddDbContext<TaskContext>(options =>
-            //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
             //descomente para utilizar o localDB
             services.AddDbContext<TaskContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("LocalDbConnection")));
@@ -39,6 +36,16 @@ namespace TaskProject
             services.AddRazorPages().AddRazorRuntimeCompilation();
 
             services.AddScoped<TasksDal>();
+
+            // Authentication using cookies (we sign-in after verifying credentials, but JWT is created in DAL for interop)
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/Home/UserLogin";
+                    options.Cookie.Name = "TaskProjectAuth";
+                });
+
+            services.AddAuthorization();
 
             // Add framework services.
             services.AddMvc();
@@ -62,6 +69,7 @@ namespace TaskProject
 
             app.UseRouting();
 
+            app.UseAuthentication(); // <--- must come before UseAuthorization
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -74,8 +82,6 @@ namespace TaskProject
             DbInitializer.Initialize(context);
 
             app.UseBrowserLink();
-
-            //BackgroundJob.Enqueue<FileWatcher>(fw => fw.Watch());
         }
     }
 }

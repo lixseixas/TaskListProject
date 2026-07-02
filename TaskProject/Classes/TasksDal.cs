@@ -172,8 +172,25 @@ namespace TaskProject.Bl
             else
             {
                 return false;
+            }         
+
+        }
+
+        public bool GetUserPassword(string userLogin, ref UserLoginModel userModel)
+        {
+            var userList = _context.UserLogins.Where(p => p.User == userLogin).ToList();
+
+            if (userList.Count > 0)
+            {
+                userModel = userList.FirstOrDefault();
+                return true;
             }
-          
+
+            else
+            {
+                return false;
+            }
+
 
         }
 

@@ -191,6 +191,44 @@ namespace TaskProject.Controllers
             return List();
         }
 
+        public IActionResult UserLogin()
+        {
+            UserLoginModel taskModel = new UserLoginModel();
+            taskModel.Id = Guid.NewGuid();
+            //taskModel.Date = DateTime.Now;
+            //taskModel.Priority = 1;
+            return View(taskModel);
+        }
+
+        [HttpPost]
+        public IActionResult UserLogin(UserLoginModel userModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(userModel);
+            }                              
+          
+            TasksDal taskDb = new TasksDal();
+            bool retorno = taskDb.GetUserPassword(userModel.User, ref userModel);
+
+            if (retorno == false)
+            {
+                return View("Error");
+            }
+            else
+            {
+                if (userModel.Password != userModel.Password)
+                {
+                    ModelState.AddModelError("", "Invalid password.");
+                    return View(userModel);
+                }
+            }
+
+
+
+            return List();
+        }
+
         public IActionResult Edit(Guid id)
         {
             TaskModel taskModel = new TaskModel();

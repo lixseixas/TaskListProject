@@ -1,0 +1,19 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "TaskProject\\TaskProject.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "..\\Rabbit\\Receive\\Receive.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "..\\Rabbit\\Send\\Send.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

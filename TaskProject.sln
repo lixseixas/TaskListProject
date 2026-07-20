@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31729.503
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37411.7 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaskProject", "TaskProject\TaskProject.csproj", "{7DD39210-D053-4F95-8C86-F4A7238D37F9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject\TestProject.csproj", "{1DBDB61E-B0A8-429D-B9C7-3239468B78CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Receive", "..\Rabbit\Receive\Receive.csproj", "{7DBB0105-E925-A9A4-8A27-849E10133BFA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Send", "..\Rabbit\Send\Send.csproj", "{B09740C5-65E3-6978-A7C9-9D232D751715}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{1DBDB61E-B0A8-429D-B9C7-3239468B78CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1DBDB61E-B0A8-429D-B9C7-3239468B78CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1DBDB61E-B0A8-429D-B9C7-3239468B78CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DBB0105-E925-A9A4-8A27-849E10133BFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DBB0105-E925-A9A4-8A27-849E10133BFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DBB0105-E925-A9A4-8A27-849E10133BFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DBB0105-E925-A9A4-8A27-849E10133BFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B09740C5-65E3-6978-A7C9-9D232D751715}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B09740C5-65E3-6978-A7C9-9D232D751715}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B09740C5-65E3-6978-A7C9-9D232D751715}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B09740C5-65E3-6978-A7C9-9D232D751715}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

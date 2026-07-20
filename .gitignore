@@ -17,3 +17,9 @@
 /TestProject/bin/Debug/net8.0
 /.vs
 /.vs/TaskProject/config/applicationhost.config
+/RabbitMqReceive/Receive/.vs
+/RabbitMqReceive/Receive/Receive/bin/Debug/net8.0
+/RabbitMqReceive/Receive/Receive/obj
+/RabbitMqSend/Send/.vs
+/RabbitMqSend/Send/Send/bin/Debug/net8.0
+/RabbitMqSend/Send/Send/obj

@@ -42,5 +42,43 @@ public class TaskReportService
 
         return tasks;
     }
+
+    /// <summary>
+    /// Inserts a weekly task report entry.
+    /// </summary>
+    /// <param name="report">Weekly report entry to insert</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The inserted report entry</returns>
+    public async Task<WeeklyTaskReportModel> InsertWeeklyTaskReportAsync(
+        WeeklyTaskReportModel report,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(report);
+
+        if (report.WeekStartDate.Date > report.WeekEndDate.Date)
+        {
+            throw new ArgumentException("Week start date must be before or equal to week end date");
+        }
+
+        if (report.TotalTasks < 0 || report.CompletedTasks < 0 || report.PendingTasks < 0)
+        {
+            throw new ArgumentException("Task counts cannot be negative");
+        }
+
+        if (report.CompletedTasks + report.PendingTasks > report.TotalTasks)
+        {
+            throw new ArgumentException("Completed and pending tasks cannot exceed total tasks");
+        }
+
+        if (report.Id == Guid.Empty)
+        {
+            report.Id = Guid.NewGuid();
+        }
+
+        _context.WeeklyTasks.Add(report);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return report;
+    }
        
 }

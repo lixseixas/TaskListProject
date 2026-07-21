@@ -66,4 +66,48 @@ public class TaskReportController : ControllerBase
             return StatusCode(500, "An error occurred while generating the report");
         }
     }
+
+    /// <summary>
+    /// Inserts a weekly task report entry.
+    /// </summary>
+    /// <param name="report">Weekly report entry to insert</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The inserted weekly task report entry</returns>
+    [HttpPost("weekly")]
+    [ProducesResponseType(typeof(WeeklyTaskReportModel), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<WeeklyTaskReportModel>> InsertWeeklyReport(
+        [FromBody] WeeklyTaskReportModel report,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            var insertedReport = await _reportService.InsertWeeklyTaskReportAsync(report, cancellationToken);
+
+            return CreatedAtAction(
+                nameof(GetWeeklyReport),
+                new
+                {
+                    startDate = insertedReport.WeekStartDate,
+                    endDate = insertedReport.WeekEndDate
+                },
+                insertedReport);
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex, "Invalid weekly task report received");
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error inserting weekly task report");
+            return StatusCode(500, "An error occurred while inserting the report");
+        }
+    }
 }

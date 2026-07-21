@@ -7,11 +7,15 @@
         "Action": "Start"
       },
       {
-        "Path": "..\\Rabbit\\Receive\\Receive.csproj",
+        "Path": "TaskReportApi\\TaskReportApi.csproj",
         "Action": "Start"
       },
       {
-        "Path": "..\\Rabbit\\Send\\Send.csproj",
+        "Path": "RabbitMqReceive\\RabbitMqReceive.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "RabbitMqSend\\RabbitMqSend.csproj",
         "Action": "Start"
       }
     ]

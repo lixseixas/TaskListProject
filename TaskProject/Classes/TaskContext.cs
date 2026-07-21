@@ -20,6 +20,7 @@ namespace TaskProject.Bl
         {
             modelBuilder.Entity<TaskModel>().ToTable("Tasks");
             modelBuilder.Entity<UserLoginModel>().ToTable("UserLogin");
+            modelBuilder.Entity<WeeklyTaskReportModel>().ToTable("WeeklyTaskReports");
         }
     }
 }

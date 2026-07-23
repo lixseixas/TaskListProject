@@ -6,13 +6,14 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using TaskProject.Bl;
+using TaskListProject.Infrastructure.Data;
 using TaskProject.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using TaskProject.Domain.Entities;
 
 namespace TaskProject.Controllers
 {
@@ -20,21 +21,18 @@ namespace TaskProject.Controllers
     public class TaskController : Controller
     {
         private readonly ILogger<TaskController> _logger;
-        private readonly TaskContext _context;
 
-        public TaskController(ILogger<TaskController> logger, TaskContext context)
+        public TaskController(ILogger<TaskController> logger)
         {
             _logger = logger;
-            _context = context;
         }
 
-       
         public IActionResult List()
         {
             try
             
             {
-                List<TaskModel> taskList = new List<TaskModel>();
+                List<TaskDto> taskList = new List<TaskDto>();
 
                 TasksDal taskDb = new TasksDal();
                 bool retorno = taskDb.GetTasks(ref taskList);
@@ -45,7 +43,26 @@ namespace TaskProject.Controllers
                 }
 
                 TaskListModel taskListModel = new TaskListModel();
-                taskListModel.TaskList = taskList;
+                List<TaskModel> taskListModels = new List<TaskModel>();
+
+                // Map TaskDto to TaskModel
+                foreach (var item in taskList)
+                {
+                    TaskModel taskModelItem = new TaskModel
+                    {
+                        Id = item.Id,
+                        Date = item.Date,
+                        Description = item.Description,
+                        Title = item.Title,
+                        InitialHour = item.InitialHour,
+                        FinalHour = item.FinalHour,
+                        Priority = item.Priority,
+                        Ended = item.Ended
+                    };
+                    taskListModels.Add(taskModelItem);
+                }
+
+                taskListModel.TaskList = taskListModels;
 
                 return View("List", taskListModel);
             }
@@ -84,7 +101,7 @@ namespace TaskProject.Controllers
         [HttpPost]
         public IActionResult ListHoursPerDay(SearchTaskModel taskModel)
         {
-            List<SummarizedTasksModel> listaTasks = new List<SummarizedTasksModel>();
+            List<SummarizedTasksDto> listaTasks = new List<SummarizedTasksDto>();
             TasksDal taskDb = new TasksDal();
             bool retorno = taskDb.GetSummarizedTasks(taskModel.InitialDate,
                                                         taskModel.FinalDate, ref listaTasks);
@@ -94,7 +111,20 @@ namespace TaskProject.Controllers
                 return View("Error");
             }
 
-            taskModel.ListTasksSummarized = listaTasks;
+            List<SummarizedTasksModel> listaTasksModel = new List<SummarizedTasksModel>();
+            foreach (var task in listaTasks) {
+                SummarizedTasksModel taskModelItem = new SummarizedTasksModel
+                {
+                    Date = task.Date,
+                    Hours = task.Hours,
+                    TotalTasks = task.TotalTasks,
+                    AverageHours = task.AverageHours,
+                    PercentualConcludedTasks = task.PercentualConcludedTasks
+                };
+                listaTasksModel.Add(taskModelItem);
+            }
+
+            taskModel.ListTasksSummarized = listaTasksModel;
             return Json(taskModel);
         }
 
@@ -183,7 +213,20 @@ namespace TaskProject.Controllers
             taskModel.FinalHour = taskModel.Date.AddHours(taskModel.FinalHour.Hour).AddMinutes(taskModel.FinalHour.Minute);
 
             TasksDal taskDb = new TasksDal();
-            bool retorno = taskDb.AddTask(taskModel);
+
+            TaskDto taskDto = new TaskDto
+            {
+                Id = taskModel.Id,
+                Title = taskModel.Title,
+                Description = taskModel.Description,
+                Date = taskModel.Date,
+                InitialHour = taskModel.InitialHour,
+                FinalHour = taskModel.FinalHour,
+                Priority = taskModel.Priority,
+                Ended = taskModel.Ended
+            };
+
+            bool retorno = taskDb.AddTask(taskDto);
 
             if (retorno == false)
             {
@@ -198,12 +241,24 @@ namespace TaskProject.Controllers
             TaskModel taskModel = new TaskModel();
 
             TasksDal taskDb = new TasksDal();
-            bool retorno = taskDb.GetTask(id, ref taskModel);
+            TaskDto taskDto = new TaskDto();
+            bool retorno = taskDb.GetTask(id, ref taskDto);
 
             if (retorno == false)
             {
                 return View("Error");
             }
+
+            //convert TaskDto to TaskModel
+            taskModel.Id = taskDto.Id;
+            taskModel.Title = taskDto.Title;
+            taskModel.Description = taskDto.Description;
+            taskModel.Date = taskDto.Date;
+            taskModel.InitialHour = taskDto.InitialHour;
+            taskModel.FinalHour = taskDto.FinalHour;
+            taskModel.Priority = taskDto.Priority;
+            taskModel.Ended = taskDto.Ended;
+            taskModel.Inclusion = "edit";            
 
             return View("Include", taskModel);
         }
@@ -230,7 +285,19 @@ namespace TaskProject.Controllers
             taskModel.InitialHour = taskModel.Date.AddHours(taskModel.InitialHour.Hour).AddMinutes(taskModel.InitialHour.Minute);
             taskModel.FinalHour = taskModel.Date.AddHours(taskModel.FinalHour.Hour).AddMinutes(taskModel.FinalHour.Minute);
 
-            bool retorno = taskDb.AddTask(taskModel);
+            TaskDto taskDto = new TaskDto
+            {
+                Id = taskModel.Id,
+                Title = taskModel.Title,
+                Description = taskModel.Description,
+                Date = taskModel.Date,
+                InitialHour = taskModel.InitialHour,
+                FinalHour = taskModel.FinalHour,
+                Priority = taskModel.Priority,
+                Ended = taskModel.Ended
+            };
+
+            bool retorno = taskDb.AddTask(taskDto);
             if (retorno == false)
             {
                 return View("Error");

@@ -5,7 +5,7 @@ namespace TaskProject.Domain.Entities;
 /// <summary>
 /// Represents a weekly task report entry showing task counts per week
 /// </summary>
-public record WeeklyTaskReportModel
+public record WeeklyTaskReportDto
 {
     public Guid Id { get; set; }
 

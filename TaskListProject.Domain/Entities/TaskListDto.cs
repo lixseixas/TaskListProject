@@ -5,16 +5,16 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TaskProject.Domain.Entities
 {
-    public class TaskListModel
+    public class TaskListDto
     {
 
-        public TaskListModel()
+        public TaskListDto()
         {
-            TaskList = new List<TaskModel>();
+            TaskList = new List<TaskDto>();
         }
 
         [NotMapped]
-        public List<TaskModel> TaskList { get; set; }
+        public List<TaskDto> TaskList { get; set; }
 
        
     }

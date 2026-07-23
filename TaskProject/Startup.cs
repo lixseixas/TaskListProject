@@ -9,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TaskProject.Bl;
+using TaskListProject.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace TaskProject
@@ -29,13 +29,7 @@ namespace TaskProject
         {
             services.AddControllersWithViews();
 
-            //descomente para utilizar o localDB
-            services.AddDbContext<TaskContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("LocalDbConnection")));
-
             services.AddRazorPages().AddRazorRuntimeCompilation();
-
-            services.AddScoped<TasksDal>();
 
             // Authentication using cookies (we sign-in after verifying credentials, but JWT is created in DAL for interop)
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -53,7 +47,7 @@ namespace TaskProject
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         // Added ILogger<Startup> to allow startup logging
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TaskContext context, ILogger<Startup> logger)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
             logger.LogInformation("Application starting up");
 
@@ -78,8 +72,6 @@ namespace TaskProject
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
-
-            DbInitializer.Initialize(context);
 
             app.UseBrowserLink();
         }

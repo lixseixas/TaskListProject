@@ -6,13 +6,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using TaskProject.Bl;
 using TaskProject.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using TaskListProject.Infrastructure.Data;
 
 namespace TaskProject.Controllers
 {
@@ -20,12 +20,10 @@ namespace TaskProject.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly TaskContext _context;
 
-        public HomeController(ILogger<HomeController> logger, TaskContext context)
+        public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
-            _context = context;
         }
 
         [AllowAnonymous]

@@ -2,8 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Configuration;
-using TaskProject.Bl;
-using TaskProject.Models;
+using TaskListProject.Infrastructure.Data;
+using TaskProject.Domain.Entities;
 
 namespace TestProject
 {
@@ -18,7 +18,7 @@ namespace TestProject
         public void GetTasksTest()
         {
                        
-            List<TaskModel> taskList = new List<TaskModel>();
+            List<TaskDto> taskList = new List<TaskDto>();
             TasksDal taskBd = new TasksDal();
             bool methodReturn = taskBd.GetTasks(ref taskList);
 

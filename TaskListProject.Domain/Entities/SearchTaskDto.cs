@@ -5,11 +5,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TaskProject.Domain.Entities
 {
-    public class SearchTaskModel
+    public class SearchTaskDto
     {
-        public SearchTaskModel()
+        public SearchTaskDto()
         {           
-            ListTasksSummarized = new List<SummarizedTasksModel>();
+            ListTasksSummarized = new List<SummarizedTasksDto>();
         }
 
         [Display(Name = "From:")]
@@ -23,6 +23,6 @@ namespace TaskProject.Domain.Entities
         public DateTime FinalDate { get; set; }                
        
         [NotMapped]
-        public List<SummarizedTasksModel> ListTasksSummarized { get; set; }
+        public List<SummarizedTasksDto> ListTasksSummarized { get; set; }
     }
 }

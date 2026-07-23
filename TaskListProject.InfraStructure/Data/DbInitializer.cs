@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TaskProject.Models;
+using TaskProject.Domain.Entities;
 
-namespace TaskProject.Bl
+namespace TaskListProject.Infrastructure.Data
 {
     public class DbInitializer
     {       

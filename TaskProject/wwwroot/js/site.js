@@ -18,7 +18,7 @@ function FindTasks() {
     dateReceivedFinal = $("#FinalDate").val();
 
     //acessing the services
-    $.post("http://localhost:50747/Home/ListHoursPerDay/",
+    $.post("http://localhost:50747/Task/ListHoursPerDay/",
         {
             InitialDate: dateReceivedInicial,
             FinalDate: dateReceivedFinal,

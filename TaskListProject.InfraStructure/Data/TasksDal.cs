@@ -1,18 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Protocols;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
-using TaskProject.Models;
+using TaskProject.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace TaskProject.Bl
+namespace TaskListProject.Infrastructure.Data
 {
     public class TasksDal
     {
@@ -33,29 +33,27 @@ namespace TaskProject.Bl
             return new TaskContext(optionsBuilder.Options);
         }
 
-        public bool AddTask( TaskModel taskModel)
+        public bool AddTask( TaskDto taskDto)
         {
             try
             {
-                if (taskModel.Inclusion == "edit")
+                if (taskDto.Inclusion == "edit")
                 {
-                    TaskModel obtainedTaskModel = new TaskModel();
+                    TaskDto obtainedTaskDto = new TaskDto();
 
-                    GetTask(taskModel.Id, ref obtainedTaskModel);
-
-                    obtainedTaskModel.Description = taskModel.Description;
-                    obtainedTaskModel.Date = taskModel.Date;
-                    obtainedTaskModel.Title = taskModel.Title;
-                    obtainedTaskModel.InitialHour = taskModel.InitialHour;
-                    obtainedTaskModel.FinalHour = taskModel.FinalHour;
-                    obtainedTaskModel.Priority = taskModel.Priority;
-                    obtainedTaskModel.Ended = taskModel.Ended;
-
+                    GetTask(taskDto.Id, ref obtainedTaskDto);     
+                    obtainedTaskDto.Description = taskDto.Description;
+                    obtainedTaskDto.Date = taskDto.Date;
+                    obtainedTaskDto.Title = taskDto.Title;
+                    obtainedTaskDto.InitialHour = taskDto.InitialHour;
+                    obtainedTaskDto.FinalHour = taskDto.FinalHour;
+                    obtainedTaskDto.Priority = taskDto.Priority;
+                    obtainedTaskDto.Ended = taskDto.Ended;
                     _context.SaveChanges();
                 }
                 else
                 {
-                    _context.Tasks.Add(taskModel);
+                    _context.Tasks.Add(taskDto);
                     _context.SaveChanges();
                 }
 
@@ -69,7 +67,7 @@ namespace TaskProject.Bl
 
         }
 
-        public bool GetTasks(ref List<TaskModel> taskList)
+        public bool GetTasks(ref List<TaskDto> taskList)
         {
             try
             {
@@ -104,13 +102,13 @@ namespace TaskProject.Bl
 
         }
 
-        public bool GetSummarizedTasks(DateTime dataInicial, DateTime dataFinal, ref List<SummarizedTasksModel> consolidatedList)
+        public bool GetSummarizedTasks(DateTime dataInicial, DateTime dataFinal, ref List<SummarizedTasksDto> consolidatedList)
         {
             try
             {
                 dataFinal = dataFinal.AddHours(23).AddMinutes(59);
 
-                List<TaskModel> taskList = _context.Tasks.Where(p => p.Date >= dataInicial
+                List<TaskDto> taskList = _context.Tasks.Where(p => p.Date >= dataInicial
                                                                    && p.Date <= dataFinal)
                                                                 .OrderBy(p => p.Date)
                                                                 .ToList();
@@ -120,7 +118,7 @@ namespace TaskProject.Bl
 
                 foreach (var item in summarizedListPerDay)
                 {
-                    SummarizedTasksModel summarized = new SummarizedTasksModel();
+                    SummarizedTasksDto summarized = new SummarizedTasksDto();
 
                     TimeSpan totalHours = new TimeSpan();
                     TimeSpan totalHoursConcluded = new TimeSpan();
@@ -161,16 +159,29 @@ namespace TaskProject.Bl
 
         }
 
-        public bool GetTask(Guid id, ref TaskModel taskModel)
+        public bool GetTask(Guid id, ref TaskDto taskDto)
         {
             var taskList = _context.Tasks.Where(p => p.Id == id).ToList();
 
-            if (taskList.Count > 0)
+            if (taskList != null && taskList.Count > 0)
             {
-                taskModel = taskList.FirstOrDefault();
+               
+                var found = taskList.FirstOrDefault();
+                if (found != null)
+                {
+                    taskDto.Id = found.Id;
+                    taskDto.Title = found.Title;
+                    taskDto.Description = found.Description;
+                    taskDto.Date = found.Date;
+                    taskDto.InitialHour = found.InitialHour;
+                    taskDto.FinalHour = found.FinalHour;
+                    taskDto.Priority = found.Priority;
+                    taskDto.PriorityName = found.PriorityName;
+                    taskDto.Ended = found.Ended;
+                    taskDto.Inclusion = found.Inclusion;
+                }
                 return true;
             }
-
             else
             {
                 return false;
@@ -228,7 +239,7 @@ namespace TaskProject.Bl
 
         public bool ValidateTaskSuperposition(Guid idAgendamento, DateTime data, DateTime dataInicial, DateTime dataFinal)
         {
-            TaskModel itemFound = new TaskModel();
+            TaskDto itemFound = new TaskDto();
             
             //filter all of tasks with the same date and diferente id
             var listaFiltrada = _context.Tasks.Where(p => p.Date >= data && p.Id != idAgendamento)
@@ -286,4 +297,3 @@ namespace TaskProject.Bl
 
     }
 }
-

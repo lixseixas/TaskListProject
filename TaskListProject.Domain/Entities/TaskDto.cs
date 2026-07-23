@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TaskProject.Domain.Entities
 {
-    public class TaskModel
+    public class TaskDto
     {
         public Guid Id { get; set; }
 

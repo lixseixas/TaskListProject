@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TaskProject.Domain.Entities
 {
-    public class UserLoginModel
+    public class UserLoginDto
     {
         public Guid Id { get; set; }
 

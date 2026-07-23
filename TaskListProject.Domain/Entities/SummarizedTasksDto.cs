@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TaskProject.Domain.Entities
 {
-    public class SummarizedTasksModel
+    public class SummarizedTasksDto
     {
         [NotMapped]
         [DataType(DataType.Date)]

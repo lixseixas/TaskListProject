@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace TaskProject.Migrations
+namespace TaskListProject.Infrastructure.Migrations
 {
     public partial class userLogin : Migration
     {

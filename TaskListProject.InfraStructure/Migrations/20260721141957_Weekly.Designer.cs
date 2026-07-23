@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaskListProject.Infrastructure.Data;
 
-namespace TaskProject.Migrations
+namespace TaskListProject.Infrastructure.Migrations
 {
     [DbContext(typeof(TaskContext))]
-    [Migration("20260702140016_userLogin")]
-    partial class userLogin
+    [Migration("20260721141957_Weekly")]
+    partial class Weekly
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -72,6 +72,41 @@ namespace TaskProject.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("UserLogin");
+                });
+
+            modelBuilder.Entity("TaskProject.Models.WeeklyTaskReportModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("CompletedTasks")
+                        .HasColumnType("int");
+
+                    b.Property<double>("CompletionPercentage")
+                        .HasColumnType("float");
+
+                    b.Property<int>("PendingTasks")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalTasks")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("WeekEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("WeekNumber")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("WeekStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WeeklyTaskReports");
                 });
 #pragma warning restore 612, 618
         }

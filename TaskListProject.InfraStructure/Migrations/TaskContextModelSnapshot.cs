@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaskListProject.Infrastructure.Data;
 
-namespace TaskProject.Migrations
+namespace TaskListProject.Infrastructure.Migrations
 {
     [DbContext(typeof(TaskContext))]
     partial class TaskContextModelSnapshot : ModelSnapshot

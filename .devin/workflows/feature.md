@@ -31,80 +31,81 @@ The TaskListProject is a C# .NET solution consisting of multiple projects for ta
 
 ## Current Issues and Technical Debt
 
-### 1. **Entity Framework Version Inconsistency**
+### 1. **Entity Framework Version Inconsistency** ⚠️
 - TaskProject uses EF Core 5.0.11
 - TaskReportApi uses EF Core 8.0.0
 - **Impact**: Potential compatibility issues, missing performance improvements and security patches
 - **Recommendation**: Upgrade TaskProject to EF Core 8.0.0
 
-### 2. **Duplicate Model Definitions**
-- `TaskModel` exists in both `TaskProject.Models` and `TaskReportApi.Models`
-- `WeeklyTaskReportModel` exists in both projects
+### 2. **Duplicate Model Definitions** ⚠️ PARTIALLY RESOLVED
+- ✅ Models moved to `TaskListProject.Domain.Entities` (TaskDto, UserLoginDto, WeeklyTaskReportDto, etc.)
+- ⚠️ TaskReportApi still has its own models in `TaskReportApi.Models` namespace
 - **Impact**: Code duplication, maintenance burden, potential inconsistencies
-- **Recommendation**: Create a shared class library for common models
+- **Recommendation**: TaskReportApi should reference and use TaskListProject.Domain.Entities
 
-### 3. **Data Access Pattern Inconsistency**
-- TaskProject uses `TasksDal` class (custom data access layer)
-- TaskReportApi uses `DbContext` directly with modern patterns
-- **Impact**: Inconsistent patterns, harder to maintain
-- **Recommendation**: Standardize on Repository pattern or direct DbContext usage
+### 3. **Data Access Pattern Inconsistency** ✅ RESOLVED
+- ✅ TaskContext and TasksDal moved to `TaskListProject.Infrastructure.Data`
+- ✅ Infrastructure project configured with EF Design tools
+- ✅ Migrations moved to Infrastructure project
+- **Status**: Data access layer now properly separated in Infrastructure project
 
-### 4. **TaskReportApi Service Implementation Incomplete**
+### 4. **TaskReportApi Service Implementation Incomplete** ⚠️
 - `GetWeeklyTaskReportAsync` only queries existing `WeeklyTasks` table
 - Does not aggregate data from `Tasks` table to generate reports
 - **Impact**: API doesn't actually generate reports, just retrieves pre-calculated data
 - **Recommendation**: Implement proper aggregation logic from Tasks table
 
-### 5. **Missing Database Migrations**
-- TaskReportApi has empty Migrations folder
-- **Impact**: Database schema may not be in sync
-- **Recommendation**: Create and apply migrations
+### 5. **Missing Database Migrations** ✅ RESOLVED
+- ✅ Migrations moved to `TaskListProject.Infrastructure.Migrations`
+- ✅ Namespace updated to `TaskListProject.Infrastructure.Migrations`
+- ✅ EF Design tools added to Infrastructure project
+- **Status**: Migrations now properly located in Infrastructure project
 
-### 6. **No Input Validation in API**
-- TaskReportApi lacks FluentValidation or DataAnnotations validation
+### 6. **No Input Validation in API** ⚠️
+- TaskReportApi has empty Validators folder
 - **Impact**: Invalid data can be processed
-- **Recommendation**: Add validation layer
+- **Recommendation**: Add validation layer using FluentValidation or DataAnnotations
 
-### 7. **Outdated Startup Pattern**
+### 7. **Outdated Startup Pattern** ⚠️
 - TaskProject uses `Startup.cs` (older pattern)
 - TaskReportApi uses modern top-level statements in `Program.cs`
 - **Impact**: Inconsistent project structure
 - **Recommendation**: Migrate TaskProject to Program.cs pattern
 
-### 8. **Missing Unit Tests**
-- TestProject exists but appears empty
-- **Impact**: No test coverage, regression risk
-- **Recommendation**: Add unit tests for business logic
+### 8. **Missing Unit Tests** ⚠️ PARTIALLY RESOLVED
+- ✅ TestProject has DbTests.cs with basic tests
+- ⚠️ Limited test coverage, needs expansion
+- **Impact**: Minimal test coverage, regression risk
+- **Recommendation**: Add comprehensive unit tests for business logic
 
-### 9. **Unclear RabbitMQ Integration**
+### 9. **Unclear RabbitMQ Integration** ⚠️
 - RabbitMQ projects exist with unclear integration
 - **Impact**: Unused code, potential confusion
 - **Recommendation**: Document purpose or remove if unused
 
-### 10. **Gitignore Overly Broad**
-- `.gitignore` blocks all `.md` files
-- **Impact**: Cannot commit documentation
-- **Recommendation**: Be more specific with ignore patterns
+### 10. **Gitignore Overly Broad** ✅ RESOLVED
+- ✅ `.gitignore` no longer blocks `.md` files
+- **Status**: Documentation can now be committed
 
 ## Proposed Modernization Plan
 
 ### Phase 1: Foundation (High Priority)
-1. Create shared class library for common models and interfaces
-2. Upgrade TaskProject to EF Core 8.0.0
-3. Standardize data access pattern across projects
-4. Fix .gitignore to allow documentation
+1. ✅ Create shared class library for common models and interfaces (TaskListProject.Domain created)
+2. ⚠️ Upgrade TaskProject to EF Core 8.0.0 (still on 5.0.11)
+3. ✅ Standardize data access pattern across projects (Infrastructure project created)
+4. ✅ Fix .gitignore to allow documentation
 
 ### Phase 2: API Enhancement (High Priority)
 1. Implement proper weekly report aggregation logic in TaskReportService
 2. Add input validation using FluentValidation
-3. Create and apply database migrations for TaskReportApi
+3. Make TaskReportApi reference TaskListProject.Domain.Entities instead of local models
 4. Add comprehensive error handling and logging
 
 ### Phase 3: Web App Modernization (Medium Priority)
 1. Migrate TaskProject from Startup.cs to Program.cs pattern
-2. Implement Repository pattern for data access
-3. Add unit tests for business logic
-4. Improve validation logic in TaskController
+2. Expand unit tests for business logic beyond basic DbTests
+3. Improve validation logic in TaskController
+4. Consider upgrading EF Core to 8.0.0 for consistency
 
 ### Phase 4: Integration & Documentation (Low Priority)
 1. Document RabbitMQ integration purpose or remove

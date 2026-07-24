@@ -1,19 +1,13 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
+using TaskListProject.Application;
 using TaskListProject.Infrastructure.Data;
-using TaskProject.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using TaskProject.Domain.Entities;
+using TaskProject.Models;
 
 namespace TaskProject.Controllers
 {
@@ -21,10 +15,14 @@ namespace TaskProject.Controllers
     public class TaskController : Controller
     {
         private readonly ILogger<TaskController> _logger;
+        private readonly TasksHandler tasksHandler;
+        private readonly TasksDal _tasksDal;
 
-        public TaskController(ILogger<TaskController> logger)
+        public TaskController(ILogger<TaskController> logger, TasksHandler tasksHandler, TasksDal tasksDal)
         {
             _logger = logger;
+            this.tasksHandler = tasksHandler ?? throw new ArgumentNullException(nameof(tasksHandler));
+            this._tasksDal = tasksDal ?? throw new ArgumentNullException(nameof(tasksDal));
         }
 
         public IActionResult List()
@@ -33,9 +31,8 @@ namespace TaskProject.Controllers
             
             {
                 List<TaskDto> taskList = new List<TaskDto>();
-
-                TasksDal taskDb = new TasksDal();
-                bool retorno = taskDb.GetTasks(ref taskList);
+                                
+                bool retorno = tasksHandler.GetTasks(ref taskList);
 
                 if (retorno == false)
                 {
@@ -102,9 +99,9 @@ namespace TaskProject.Controllers
         public IActionResult ListHoursPerDay(SearchTaskModel taskModel)
         {
             List<SummarizedTasksDto> listaTasks = new List<SummarizedTasksDto>();
-            TasksDal taskDb = new TasksDal();
-            bool retorno = taskDb.GetSummarizedTasks(taskModel.InitialDate,
-                                                        taskModel.FinalDate, ref listaTasks);
+             var taskDb = _tasksDal;
+             bool retorno = taskDb.GetSummarizedTasks(taskModel.InitialDate,
+                                                         taskModel.FinalDate, ref listaTasks);
 
             if (retorno == false)
             {
@@ -180,8 +177,8 @@ namespace TaskProject.Controllers
                 return false;
             }
 
-            TasksDal taskDb = new TasksDal();
-            bool retornoSobreposicao = taskDb.ValidateTaskSuperposition(taskModel.Id, taskModel.Date,
+           
+            bool retornoSobreposicao = tasksHandler.ValidateTaskSuperposition(taskModel.Id, taskModel.Date,
                                                                         dataInicioTask, dataFimTask);
             if (retornoSobreposicao == false)
             {
@@ -212,8 +209,8 @@ namespace TaskProject.Controllers
             taskModel.InitialHour = taskModel.Date.AddHours(taskModel.InitialHour.Hour).AddMinutes(taskModel.InitialHour.Minute);
             taskModel.FinalHour = taskModel.Date.AddHours(taskModel.FinalHour.Hour).AddMinutes(taskModel.FinalHour.Minute);
 
-            TasksDal taskDb = new TasksDal();
-
+            // use injected TasksHandler
+            var handler = tasksHandler;
             TaskDto taskDto = new TaskDto
             {
                 Id = taskModel.Id,
@@ -226,7 +223,7 @@ namespace TaskProject.Controllers
                 Ended = taskModel.Ended
             };
 
-            bool retorno = taskDb.AddTask(taskDto);
+            bool retorno = handler.AddTask(taskDto);
 
             if (retorno == false)
             {
@@ -240,9 +237,9 @@ namespace TaskProject.Controllers
         {
             TaskModel taskModel = new TaskModel();
 
-            TasksDal taskDb = new TasksDal();
-            TaskDto taskDto = new TaskDto();
-            bool retorno = taskDb.GetTask(id, ref taskDto);
+             var taskDb = _tasksDal;
+              TaskDto taskDto = new TaskDto();
+              bool retorno = taskDb.GetTask(id, ref taskDto);
 
             if (retorno == false)
             {
@@ -280,7 +277,7 @@ namespace TaskProject.Controllers
             }
 
             taskModel.Inclusion = "edit";
-            TasksDal taskDb = new TasksDal();
+            var taskDb = _tasksDal;
 
             taskModel.InitialHour = taskModel.Date.AddHours(taskModel.InitialHour.Hour).AddMinutes(taskModel.InitialHour.Minute);
             taskModel.FinalHour = taskModel.Date.AddHours(taskModel.FinalHour.Hour).AddMinutes(taskModel.FinalHour.Minute);

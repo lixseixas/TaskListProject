@@ -18,9 +18,16 @@ namespace TaskListProject.Infrastructure.Data
     {
         private readonly TaskContext _context;
 
+        // Keep parameterless constructor for tests or callers that rely on it.
         public TasksDal()
         {
             _context = GetContext();
+        }
+
+        // Constructor for dependency injection - allows the DbContext to be provided by the DI container.
+        public TasksDal(TaskContext context)
+        {
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
 

@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TaskListProject.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using TaskListProject.Application;
 
 namespace TaskProject
 {
@@ -43,6 +44,14 @@ namespace TaskProject
 
             // Add framework services.
             services.AddMvc();
+
+            // Configure EF Core DbContext and repository for dependency injection
+            services.AddDbContext<TaskContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("LocalDbConnection")));
+
+            // Register DAL and handler for dependency injection
+            services.AddScoped<TasksDal>();
+            services.AddScoped<TasksHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

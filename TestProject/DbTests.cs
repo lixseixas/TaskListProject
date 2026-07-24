@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using System.Collections.Generic;
-using System.Configuration;
 using TaskListProject.Infrastructure.Data;
 using TaskProject.Domain.Entities;
 

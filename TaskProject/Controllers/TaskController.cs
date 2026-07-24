@@ -16,9 +16,9 @@ namespace TaskProject.Controllers
     {
         private readonly ILogger<TaskController> _logger;
         private readonly TasksHandler tasksHandler;
-        private readonly TasksDal _tasksDal;
+        private readonly TasksQueries _tasksDal;
 
-        public TaskController(ILogger<TaskController> logger, TasksHandler tasksHandler, TasksDal tasksDal)
+        public TaskController(ILogger<TaskController> logger, TasksHandler tasksHandler, TasksQueries tasksDal)
         {
             _logger = logger;
             this.tasksHandler = tasksHandler ?? throw new ArgumentNullException(nameof(tasksHandler));

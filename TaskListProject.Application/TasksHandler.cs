@@ -7,8 +7,8 @@ namespace TaskListProject.Application
 {
     public class TasksHandler
     {
-        private readonly TasksDal tasksDal;
-        public TasksHandler(TasksDal tasksDal)
+        private readonly TasksQueries tasksDal;
+        public TasksHandler(TasksQueries tasksDal)
         {
             this.tasksDal = tasksDal ?? throw new ArgumentNullException(nameof(tasksDal));
         }

@@ -19,7 +19,7 @@ namespace TestProject
         {
                        
             List<TaskDto> taskList = new List<TaskDto>();
-            TasksDal taskBd = new TasksDal();
+            TasksQueries taskBd = new TasksQueries();
             bool methodReturn = taskBd.GetTasks(ref taskList);
 
             Assert.IsTrue(methodReturn);

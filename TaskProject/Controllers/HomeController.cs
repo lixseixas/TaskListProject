@@ -49,8 +49,8 @@ namespace TaskProject.Controllers
                 return View(userModel);
             }                              
           
-            TasksDal taskDb = new TasksDal();
-            var token = taskDb.GetUserPassword(userModel.User, userModel.Password);
+            UserQueries userQuery = new UserQueries();
+            var token = userQuery.GetUserPassword(userModel.User, userModel.Password);
 
             if (string.IsNullOrEmpty(token))
             {

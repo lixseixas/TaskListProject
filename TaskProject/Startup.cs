@@ -50,7 +50,7 @@ namespace TaskProject
                 options.UseSqlServer(Configuration.GetConnectionString("LocalDbConnection")));
 
             // Register DAL and handler for dependency injection
-            services.AddScoped<TasksDal>();
+            services.AddScoped<TasksQueries>();
             services.AddScoped<TasksHandler>();
         }
 

@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskListProject.InfraStruct
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskListProject.Application", "TaskListProject.Application\TaskListProject.Application.csproj", "{0D58B71F-71F7-4E31-97BC-B8A36C466635}"
 EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "TaskListAngular", "TaskListAngular\TaskListAngular.esproj", "{8366A900-12F0-1129-2516-B9FFBFAA5C9C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -125,6 +127,24 @@ Global
 		{0D58B71F-71F7-4E31-97BC-B8A36C466635}.Release|x64.Build.0 = Release|Any CPU
 		{0D58B71F-71F7-4E31-97BC-B8A36C466635}.Release|x86.ActiveCfg = Release|Any CPU
 		{0D58B71F-71F7-4E31-97BC-B8A36C466635}.Release|x86.Build.0 = Release|Any CPU
+		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Debug|x64.Build.0 = Debug|Any CPU
+		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Debug|x64.Deploy.0 = Debug|Any CPU
+		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Debug|x86.Build.0 = Debug|Any CPU
+		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Debug|x86.Deploy.0 = Debug|Any CPU
+		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Release|x64.ActiveCfg = Release|Any CPU
+		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Release|x64.Build.0 = Release|Any CPU
+		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Release|x64.Deploy.0 = Release|Any CPU
+		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Release|x86.ActiveCfg = Release|Any CPU
+		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Release|x86.Build.0 = Release|Any CPU
+		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Release|x86.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

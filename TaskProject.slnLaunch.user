@@ -3,10 +3,6 @@
     "Name": "New Profile",
     "Projects": [
       {
-        "Path": "TaskProject\\TaskProjectWeb.csproj",
-        "Action": "Start"
-      },
-      {
         "Path": "TaskReportApi\\TaskReportApi.csproj",
         "Action": "Start"
       },
@@ -15,7 +11,7 @@
         "Action": "Start"
       },
       {
-        "Path": "RabbitMqSend\\RabbitMqSend.csproj",
+        "Path": "TaskProjectWeb\\TaskProjectWeb.csproj",
         "Action": "Start"
       }
     ]

@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskReportApi", "TaskReport
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RabbitMqReceive", "RabbitMqReceive\RabbitMqReceive.csproj", "{CE05A2B3-BE8E-223D-1DD3-57F5A3B4A310}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RabbitMqSend", "RabbitMqSend\RabbitMqSend.csproj", "{78B36B41-8CCD-5377-5EAA-E1D45CDA6EF2}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskListProject.Domain", "TaskListProject.Domain\TaskListProject.Domain.csproj", "{8B339D61-AFB3-4161-AA1B-BF275A0DE586}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskListProject.InfraStructure", "TaskListProject.InfraStructure\TaskListProject.InfraStructure.csproj", "{B43BE95C-CA0B-40D2-827E-AEAD4F35B662}"
@@ -79,18 +77,6 @@ Global
 		{CE05A2B3-BE8E-223D-1DD3-57F5A3B4A310}.Release|x64.Build.0 = Release|Any CPU
 		{CE05A2B3-BE8E-223D-1DD3-57F5A3B4A310}.Release|x86.ActiveCfg = Release|Any CPU
 		{CE05A2B3-BE8E-223D-1DD3-57F5A3B4A310}.Release|x86.Build.0 = Release|Any CPU
-		{78B36B41-8CCD-5377-5EAA-E1D45CDA6EF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{78B36B41-8CCD-5377-5EAA-E1D45CDA6EF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{78B36B41-8CCD-5377-5EAA-E1D45CDA6EF2}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{78B36B41-8CCD-5377-5EAA-E1D45CDA6EF2}.Debug|x64.Build.0 = Debug|Any CPU
-		{78B36B41-8CCD-5377-5EAA-E1D45CDA6EF2}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{78B36B41-8CCD-5377-5EAA-E1D45CDA6EF2}.Debug|x86.Build.0 = Debug|Any CPU
-		{78B36B41-8CCD-5377-5EAA-E1D45CDA6EF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{78B36B41-8CCD-5377-5EAA-E1D45CDA6EF2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{78B36B41-8CCD-5377-5EAA-E1D45CDA6EF2}.Release|x64.ActiveCfg = Release|Any CPU
-		{78B36B41-8CCD-5377-5EAA-E1D45CDA6EF2}.Release|x64.Build.0 = Release|Any CPU
-		{78B36B41-8CCD-5377-5EAA-E1D45CDA6EF2}.Release|x86.ActiveCfg = Release|Any CPU
-		{78B36B41-8CCD-5377-5EAA-E1D45CDA6EF2}.Release|x86.Build.0 = Release|Any CPU
 		{8B339D61-AFB3-4161-AA1B-BF275A0DE586}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8B339D61-AFB3-4161-AA1B-BF275A0DE586}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B339D61-AFB3-4161-AA1B-BF275A0DE586}.Debug|x64.ActiveCfg = Debug|Any CPU

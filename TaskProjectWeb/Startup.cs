@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using TaskListProject.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using TaskListProject.Application;
+using TaskProject.Services;
 
 namespace TaskProject
 {
@@ -52,6 +53,8 @@ namespace TaskProject
             // Register DAL and handler for dependency injection
             services.AddScoped<TasksQueries>();
             services.AddScoped<TasksHandler>();
+            services.Configure<RabbitMqOptions>(Configuration.GetSection(RabbitMqOptions.SectionName));
+            services.AddSingleton<IWeeklyTaskReportPublisher, RabbitMqWeeklyTaskReportPublisher>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

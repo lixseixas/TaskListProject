@@ -6,6 +6,20 @@
 
 <h1>Test AspNet Functions</h1>
 
+@if (TempData["RabbitMqSuccess"] is string successMessage)
+{
+    <div class="alert alert-success" role="alert">@successMessage</div>
+}
+
+@if (TempData["RabbitMqError"] is string errorMessage)
+{
+    <div class="alert alert-danger" role="alert">@errorMessage</div>
+}
+
+<form asp-action="SendWeeklyTaskReport" method="post" class="mb-4">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-success">Send weekly report to RabbitMQ</button>
+</form>
 
 @using (Html.BeginForm())
 {

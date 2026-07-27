@@ -4,10 +4,13 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using TaskListProject.Application;
 using TaskListProject.Infrastructure.Data;
 using TaskProject.Domain.Entities;
 using TaskProject.Models;
+using TaskProject.Services;
 
 namespace TaskProject.Controllers
 {
@@ -17,12 +20,18 @@ namespace TaskProject.Controllers
         private readonly ILogger<TaskController> _logger;
         private readonly TasksHandler tasksHandler;
         private readonly TasksQueries _tasksDal;
+        private readonly IWeeklyTaskReportPublisher _weeklyTaskReportPublisher;
 
-        public TaskController(ILogger<TaskController> logger, TasksHandler tasksHandler, TasksQueries tasksDal)
+        public TaskController(
+            ILogger<TaskController> logger,
+            TasksHandler tasksHandler,
+            TasksQueries tasksDal,
+            IWeeklyTaskReportPublisher weeklyTaskReportPublisher)
         {
             _logger = logger;
             this.tasksHandler = tasksHandler ?? throw new ArgumentNullException(nameof(tasksHandler));
             this._tasksDal = tasksDal ?? throw new ArgumentNullException(nameof(tasksDal));
+            _weeklyTaskReportPublisher = weeklyTaskReportPublisher ?? throw new ArgumentNullException(nameof(weeklyTaskReportPublisher));
         }
 
         public IActionResult List()
@@ -324,6 +333,42 @@ namespace TaskProject.Controllers
             }
 
             return List();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendWeeklyTaskReport(CancellationToken cancellationToken)
+        {
+            var today = DateTime.Today;
+            var daysSinceMonday = ((int)today.DayOfWeek + 6) % 7;
+            var weekStart = today.AddDays(-daysSinceMonday);
+            var calendar = System.Globalization.CultureInfo.InvariantCulture.Calendar;
+
+            var report = new WeeklyTaskReportModel
+            {
+                Id = Guid.NewGuid(),
+                WeekStartDate = weekStart,
+                WeekEndDate = weekStart.AddDays(6),
+                WeekNumber = calendar.GetWeekOfYear(weekStart, System.Globalization.CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday),
+                Year = weekStart.Year,
+                TotalTasks = 0,
+                CompletedTasks = 0,
+                PendingTasks = 0,
+                CompletionPercentage = 0
+            };
+
+            try
+            {
+                await _weeklyTaskReportPublisher.PublishAsync(report, cancellationToken);
+                TempData["RabbitMqSuccess"] = "Weekly task report sent to RabbitMQ.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while sending the weekly task report to RabbitMQ.");
+                TempData["RabbitMqError"] = "Unable to send the weekly task report to RabbitMQ.";
+            }
+
+            return RedirectToAction(nameof(TestAspNetFunctions));
         }
 
         [AllowAnonymous]

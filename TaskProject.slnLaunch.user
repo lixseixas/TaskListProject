@@ -7,7 +7,7 @@
         "Action": "Start"
       },
       {
-        "Path": "RabbitMqReceive\\RabbitMqReceive.csproj",
+        "Path": "RabbitMqReceive\\RabbitMqConsumerReceiver.csproj",
         "Action": "Start"
       },
       {

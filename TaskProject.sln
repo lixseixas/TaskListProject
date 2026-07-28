@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.37411.7
+# Visual Studio Version 18
+VisualStudioVersion = 18.8.12021.73
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaskProjectWeb", "TaskProjectWeb\TaskProjectWeb.csproj", "{7DD39210-D053-4F95-8C86-F4A7238D37F9}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskListProject.Application", "TaskListProject.Application\TaskListProject.Application.csproj", "{0D58B71F-71F7-4E31-97BC-B8A36C466635}"
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "TaskListAngular", "TaskListAngular\TaskListAngular.esproj", "{8366A900-12F0-1129-2516-B9FFBFAA5C9C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RabbitMqConsumerReceiver", "RabbitMqConsumerReceive\RabbitMqConsumerReceiver.csproj", "{AE4D5F4C-1CE6-CC0E-AE6C-45A513595188}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -117,6 +119,18 @@ Global
 		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Release|x86.ActiveCfg = Release|Any CPU
 		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Release|x86.Build.0 = Release|Any CPU
 		{8366A900-12F0-1129-2516-B9FFBFAA5C9C}.Release|x86.Deploy.0 = Release|Any CPU
+		{AE4D5F4C-1CE6-CC0E-AE6C-45A513595188}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE4D5F4C-1CE6-CC0E-AE6C-45A513595188}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE4D5F4C-1CE6-CC0E-AE6C-45A513595188}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AE4D5F4C-1CE6-CC0E-AE6C-45A513595188}.Debug|x64.Build.0 = Debug|Any CPU
+		{AE4D5F4C-1CE6-CC0E-AE6C-45A513595188}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AE4D5F4C-1CE6-CC0E-AE6C-45A513595188}.Debug|x86.Build.0 = Debug|Any CPU
+		{AE4D5F4C-1CE6-CC0E-AE6C-45A513595188}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE4D5F4C-1CE6-CC0E-AE6C-45A513595188}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE4D5F4C-1CE6-CC0E-AE6C-45A513595188}.Release|x64.ActiveCfg = Release|Any CPU
+		{AE4D5F4C-1CE6-CC0E-AE6C-45A513595188}.Release|x64.Build.0 = Release|Any CPU
+		{AE4D5F4C-1CE6-CC0E-AE6C-45A513595188}.Release|x86.ActiveCfg = Release|Any CPU
+		{AE4D5F4C-1CE6-CC0E-AE6C-45A513595188}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

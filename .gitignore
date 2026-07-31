@@ -74,3 +74,4 @@ appsettings.Development.json
 # OS
 .DS_Store
 Thumbs.db
+/TaskListProject.InfraStructure/appsettings.json

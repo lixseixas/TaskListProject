@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using TaskReportApi.Data;
+using TaskListProject.Infrastructure.Data;
 using TaskReportApi.Models;
+using TaskProject.Domain.Entities;
 using System.Globalization;
 
 namespace TaskReportApi.Services;
@@ -10,9 +11,9 @@ namespace TaskReportApi.Services;
 /// </summary>
 public class TaskReportService
 {
-    private readonly TaskContext _context;
+    private readonly TaskListProject.Infrastructure.Data.TaskContext _context;
 
-    public TaskReportService(TaskContext context)
+    public TaskReportService(TaskListProject.Infrastructure.Data.TaskContext context)
     {
         _context = context;
     }
@@ -34,13 +35,13 @@ public class TaskReportService
         var normalizedEndDate = endDate.Date.AddDays(1).AddTicks(-1);
 
         // Get tasks within the date range
-        var tasks = await _context.WeeklyTasks
+        var tasks = await _context.WeeklyTaskReports
             .Where(t => t.WeekStartDate >= normalizedStartDate && t.WeekEndDate <= normalizedEndDate)
             .OrderBy(t => t.WeekStartDate)
-            .ToListAsync(cancellationToken);             
-                  
+            .ToListAsync(cancellationToken);
 
-        return tasks;
+        // Map to API model
+        return tasks.Select(MapToModel).ToList();
     }
 
     /// <summary>
@@ -70,15 +71,48 @@ public class TaskReportService
             throw new ArgumentException("Completed and pending tasks cannot exceed total tasks");
         }
 
-        if (report.Id == Guid.Empty)
+        var dto = MapToDto(report);
+        if (dto.Id == Guid.Empty)
         {
-            report.Id = Guid.NewGuid();
+            dto = dto with { Id = Guid.NewGuid() };
         }
 
-        _context.WeeklyTasks.Add(report);
+        _context.WeeklyTaskReports.Add(dto);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return report;
+        return MapToModel(dto);
+    }
+
+    private WeeklyTaskReportModel MapToModel(WeeklyTaskReportDto dto)
+    {
+        return new WeeklyTaskReportModel
+        {
+            Id = dto.Id,
+            WeekStartDate = dto.WeekStartDate,
+            WeekEndDate = dto.WeekEndDate,
+            WeekNumber = dto.WeekNumber,
+            Year = dto.Year,
+            TotalTasks = dto.TotalTasks,
+            CompletedTasks = dto.CompletedTasks,
+            PendingTasks = dto.PendingTasks,
+            CompletionPercentage = dto.CompletionPercentage
+        };
+    }
+
+    private WeeklyTaskReportDto MapToDto(WeeklyTaskReportModel model)
+    {
+        return new WeeklyTaskReportDto
+        {
+            Id = model.Id,
+            WeekStartDate = model.WeekStartDate,
+            WeekEndDate = model.WeekEndDate,
+            WeekNumber = model.WeekNumber,
+            Year = model.Year,
+            TotalTasks = model.TotalTasks,
+            CompletedTasks = model.CompletedTasks,
+            PendingTasks = model.PendingTasks,
+            CompletionPercentage = model.CompletionPercentage
+        };
     }
        
 }

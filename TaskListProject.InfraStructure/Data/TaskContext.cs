@@ -15,6 +15,7 @@ namespace TaskListProject.Infrastructure.Data
 
         public DbSet<TaskDto> Tasks { get; set; }
         public DbSet<UserLoginDto> UserLogins { get; set; }
+        public DbSet<WeeklyTaskReportDto> WeeklyTaskReports { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

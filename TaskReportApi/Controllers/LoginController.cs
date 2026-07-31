@@ -1,0 +1,82 @@
+using Microsoft.AspNetCore.Mvc;
+using TaskListProject.Infrastructure.Data;
+
+namespace TaskReportApi.Controllers;
+
+/// <summary>
+/// API controller for user authentication
+/// </summary>
+[ApiController]
+[Route("api/[controller]")]
+public class LoginController : ControllerBase
+{
+    private readonly UserQueries _userQueries;
+    private readonly ILogger<LoginController> _logger;
+
+    public LoginController(UserQueries userQueries, ILogger<LoginController> logger)
+    {
+        _userQueries = userQueries;
+        _logger = logger;
+    }
+
+    /// <summary>
+    /// Authenticates a user and returns a JWT token
+    /// </summary>
+    /// <param name="loginRequest">Login credentials</param>
+    /// <returns>JWT token if authentication successful</returns>
+    [HttpPost]
+    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public IActionResult Login([FromBody] LoginRequest loginRequest)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(loginRequest.User) || string.IsNullOrWhiteSpace(loginRequest.Password))
+            {
+                _logger.LogWarning("Login attempt with empty credentials");
+                return Unauthorized("Username and password are required");
+            }
+
+            _logger.LogInformation("Login attempt for user: {User}", loginRequest.User);
+
+            var token = _userQueries.GetUserPassword(loginRequest.User, loginRequest.Password);
+
+            if (string.IsNullOrEmpty(token))
+            {
+                _logger.LogWarning("Failed login attempt for user: {User}", loginRequest.User);
+                return Unauthorized("Invalid username or password");
+            }
+
+            _logger.LogInformation("Successful login for user: {User}", loginRequest.User);
+
+            return Ok(new LoginResponse
+            {
+                Token = token,
+                User = loginRequest.User
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during login for user: {User}", loginRequest.User);
+            return StatusCode(500, "An error occurred during login");
+        }
+    }
+}
+
+/// <summary>
+/// Login request model
+/// </summary>
+public class LoginRequest
+{
+    public string User { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Login response model
+/// </summary>
+public class LoginResponse
+{
+    public string Token { get; set; } = string.Empty;
+    public string User { get; set; } = string.Empty;
+}

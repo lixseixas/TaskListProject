@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using TaskReportApi.Models;
 using TaskReportApi.Services;
 
@@ -9,6 +10,7 @@ namespace TaskReportApi.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class TaskReportController : ControllerBase
 {
     private readonly TaskReportService _reportService;

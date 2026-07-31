@@ -69,10 +69,11 @@ bld/
 
 # Local user-specific settings
 appsettings.local.json
-appsettings.Development.json
 
 # OS
 .DS_Store
 Thumbs.db
-/TaskListProject.InfraStructure/appsettings.json
 *.pubxml
+/TaskListProject.InfraStructure/appsettings.json
+/TaskProjectWeb/appsettings.json
+/TaskReportApi/appsettings.json

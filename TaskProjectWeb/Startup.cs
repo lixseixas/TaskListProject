@@ -13,6 +13,9 @@ using TaskListProject.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using TaskListProject.Application;
 using TaskProject.Services;
+using MediatR;
+using FluentValidation;
+using TaskProject.CQRS.Mapping;
 
 namespace TaskProject
 {
@@ -50,11 +53,19 @@ namespace TaskProject
             services.AddDbContext<TaskContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("LocalDbConnection")));
 
-            // Register DAL and handler for dependency injection
+            // Register TasksQueries for GetSummarizedTasksQueryHandler (still needed for now)
             services.AddScoped<TasksQueries>();
-            services.AddScoped<TasksHandler>();
             services.Configure<RabbitMqOptions>(Configuration.GetSection(RabbitMqOptions.SectionName));
             services.AddSingleton<IWeeklyTaskReportPublisher, RabbitMqWeeklyTaskReportPublisher>();
+
+            // Register MediatR
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Startup).Assembly));
+
+            // Register FluentValidation
+            services.AddValidatorsFromAssembly(typeof(Startup).Assembly);
+
+            // Configure Mapster
+            MapsterConfig.ConfigureMapster();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

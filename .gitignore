@@ -75,3 +75,4 @@ appsettings.Development.json
 .DS_Store
 Thumbs.db
 /TaskListProject.InfraStructure/appsettings.json
+*.pubxml

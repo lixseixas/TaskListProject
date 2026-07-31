@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using TaskListProject.Infrastructure.Data;
+using TaskListProject.Application;
 
 namespace TaskReportApi.Controllers;
 
@@ -10,12 +10,12 @@ namespace TaskReportApi.Controllers;
 [Route("api/[controller]")]
 public class LoginController : ControllerBase
 {
-    private readonly UserQueries _userQueries;
+    private readonly LoginHandler _loginHandler;
     private readonly ILogger<LoginController> _logger;
 
-    public LoginController(UserQueries userQueries, ILogger<LoginController> logger)
+    public LoginController(LoginHandler loginHandler, ILogger<LoginController> logger)
     {
-        _userQueries = userQueries;
+        _loginHandler = loginHandler;
         _logger = logger;
     }
 
@@ -37,17 +37,12 @@ public class LoginController : ControllerBase
                 return Unauthorized("Username and password are required");
             }
 
-            _logger.LogInformation("Login attempt for user: {User}", loginRequest.User);
-
-            var token = _userQueries.GetUserPassword(loginRequest.User, loginRequest.Password);
+            var token = _loginHandler.Authenticate(loginRequest.User, loginRequest.Password);
 
             if (string.IsNullOrEmpty(token))
             {
-                _logger.LogWarning("Failed login attempt for user: {User}", loginRequest.User);
                 return Unauthorized("Invalid username or password");
             }
-
-            _logger.LogInformation("Successful login for user: {User}", loginRequest.User);
 
             return Ok(new LoginResponse
             {

@@ -5,6 +5,7 @@ using System.Text;
 using TaskReportApi.Data;
 using TaskReportApi.Services;
 using TaskListProject.Infrastructure.Data;
+using TaskListProject.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +47,12 @@ builder.Services.AddCors(options =>
             policy.WithOrigins("http://localhost:4200")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
+
+            policy.WithOrigins("http://localhost:50747/")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+
+        
         });
 });
 
@@ -57,6 +64,7 @@ builder.Services.AddDbContext<TaskListProject.Infrastructure.Data.TaskContext>(o
 // Register services
 builder.Services.AddScoped<TaskReportService>();
 builder.Services.AddScoped<UserQueries>();
+builder.Services.AddScoped<LoginHandler>();
 
 // Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();

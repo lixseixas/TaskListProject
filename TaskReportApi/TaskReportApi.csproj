@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TaskListProject.InfraStructure\TaskListProject.InfraStructure.csproj" />
+    <ProjectReference Include="..\TaskListProject.Application\TaskListProject.Application.csproj" />
   </ItemGroup>
 
 </Project>

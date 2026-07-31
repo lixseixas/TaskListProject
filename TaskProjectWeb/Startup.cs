@@ -49,6 +49,9 @@ namespace TaskProject
             // Add framework services.
             services.AddMvc();
 
+            // Register HttpClient for calling TaskReportApi
+            services.AddHttpClient();
+
             // Configure EF Core DbContext and repository for dependency injection
             services.AddDbContext<TaskContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("LocalDbConnection")));

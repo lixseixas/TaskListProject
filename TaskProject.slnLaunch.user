@@ -9,10 +9,6 @@
       {
         "Path": "TaskProjectWeb\\TaskProjectWeb.csproj",
         "Action": "Start"
-      },
-      {
-        "Path": "RabbitMqConsumerReceive\\RabbitMqConsumerReceiver.csproj",
-        "Action": "Start"
       }
     ]
   }

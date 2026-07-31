@@ -1,10 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TaskProject.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +15,6 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using TaskListProject.Infrastructure.Data;
 
 namespace TaskProject.Controllers
 {
@@ -20,10 +22,14 @@ namespace TaskProject.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IConfiguration _configuration;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _logger = logger;
+            _httpClientFactory = httpClientFactory;
+            _configuration = configuration;
         }
 
         [AllowAnonymous]
@@ -47,29 +53,59 @@ namespace TaskProject.Controllers
             if (!ModelState.IsValid)
             {
                 return View(userModel);
-            }                              
-          
-            UserQueries userQuery = new UserQueries();
-            var token = userQuery.GetUserPassword(userModel.User, userModel.Password);
-
-            if (string.IsNullOrEmpty(token))
-            {
-                ModelState.AddModelError("", "Invalid username or password.");
-                return View(userModel);
             }
 
-            // Create claims and sign in with cookie authentication so controller actions can use identity.
-            var claims = new List<Claim>
+            var client = _httpClientFactory.CreateClient();
+            var apiUrl = _configuration["TaskReportApi:Url"] ?? "https://localhost:44322";
+            
+            var loginRequest = new
             {
-                new Claim(ClaimTypes.Name, userModel.User),
-                new Claim("JWT", token)
+                User = userModel.User,
+                Password = userModel.Password
             };
 
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+            var jsonContent = JsonSerializer.Serialize(loginRequest);
+            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-            // Redirect to Index on successful login
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                var response = await client.PostAsync($"{apiUrl}/api/login", content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    ModelState.AddModelError("", "Invalid username or password.");
+                    return View(userModel);
+                }
+
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var loginResponse = JsonSerializer.Deserialize<JsonElement>(responseContent);
+                var token = loginResponse.GetProperty("token").GetString();
+
+                if (string.IsNullOrEmpty(token))
+                {
+                    ModelState.AddModelError("", "Invalid username or password.");
+                    return View(userModel);
+                }
+
+                // Create claims and sign in with cookie authentication so controller actions can use identity.
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, userModel.User),
+                    new Claim("JWT", token)
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
+                // Redirect to Index on successful login
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error calling TaskReportApi for login");
+                ModelState.AddModelError("", "An error occurred during login. Please try again.");
+                return View(userModel);
+            }
         }
                 
         [AllowAnonymous]

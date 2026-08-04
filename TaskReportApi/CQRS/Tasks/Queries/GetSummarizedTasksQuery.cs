@@ -1,8 +1,8 @@
 using MediatR;
 using System;
-using TaskProject.Models;
+using TaskReportApi.Models;
 
-namespace TaskProject.CQRS.Tasks.Queries;
+namespace TaskReportApi.CQRS.Tasks.Queries;
 
 public class GetSummarizedTasksQuery : IRequest<SearchTaskModel>
 {

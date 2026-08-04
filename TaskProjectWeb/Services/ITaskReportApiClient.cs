@@ -11,6 +11,6 @@ namespace TaskProject.Services
         Task<TaskModel> GetTaskByIdAsync(Guid id);
         Task<bool> CreateTaskAsync(TaskModel model);
         Task<bool> UpdateTaskAsync(Guid id, TaskModel model);
-        Task<List<SummarizedTasksModel>> GetSummarizedTasksAsync(DateTime initial, DateTime final);
+        Task<SearchTaskModel> GetSummarizedTasksAsync(DateTime initial, DateTime final);
     }
 }

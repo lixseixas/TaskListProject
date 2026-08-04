@@ -1,7 +1,7 @@
 using FluentValidation;
-using TaskProject.CQRS.Tasks.Queries;
+using System;
 
-namespace TaskProject.CQRS.Tasks.Validators;
+namespace TaskReportApi.CQRS.Tasks.Queries;
 
 public class GetSummarizedTasksQueryValidator : AbstractValidator<GetSummarizedTasksQuery>
 {

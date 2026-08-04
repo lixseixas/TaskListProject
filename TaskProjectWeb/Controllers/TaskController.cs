@@ -5,9 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
-using TaskProject.CQRS.Tasks.Commands;
-using TaskProject.CQRS.Tasks.Queries;
 using TaskProject.Models;
 using TaskProject.Services;
 
@@ -17,18 +14,15 @@ namespace TaskProject.Controllers
     public class TaskController : Controller
     {
     private readonly ILogger<TaskController> _logger;
-    private readonly IMediator _mediator;
     private readonly IWeeklyTaskReportPublisher _weeklyTaskReportPublisher;
     private readonly ITaskReportApiClient _apiClient;
 
         public TaskController(
             ILogger<TaskController> logger,
-            IMediator mediator,
             IWeeklyTaskReportPublisher weeklyTaskReportPublisher,
             ITaskReportApiClient apiClient)
         {
             _logger = logger;
-            _mediator = mediator;
             _weeklyTaskReportPublisher = weeklyTaskReportPublisher;
             _apiClient = apiClient;
         }
@@ -71,14 +65,8 @@ namespace TaskProject.Controllers
         [HttpPost]
         public async Task<IActionResult> ListHoursPerDay(SearchTaskModel taskModel)
         {
-            var query = new GetSummarizedTasksQuery
-            {
-                InitialDate = taskModel.InitialDate,
-                FinalDate = taskModel.FinalDate
-            };
-
-            // Summarized tasks still powered by internal query handlers
-            var result = await _mediator.Send(query);
+            // Call API to get summarized tasks
+            var result = await _apiClient.GetSummarizedTasksAsync(taskModel.InitialDate, taskModel.FinalDate);
             return Json(result);
         }
 

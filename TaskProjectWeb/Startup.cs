@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,12 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TaskListProject.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using TaskProject.Services;
-using MediatR;
-using FluentValidation;
-using TaskProject.CQRS.Mapping;
 
 namespace TaskProject
 {
@@ -47,6 +42,8 @@ namespace TaskProject
 
             // Add IHttpContextAccessor for accessing user claims in DelegatingHandler
             services.AddHttpContextAccessor();
+            
+            // Register JwtAuthHeaderHandler as transient for HttpClient pipeline
             services.AddTransient<JwtAuthHeaderHandler>();
 
             // Add framework services.
@@ -61,23 +58,8 @@ namespace TaskProject
             })
             .AddHttpMessageHandler<JwtAuthHeaderHandler>();
 
-            // Configure EF Core DbContext and repository for dependency injection
-            services.AddDbContext<TaskContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("LocalDbConnection")));
-
-            // Register TasksQueries for GetSummarizedTasksQueryHandler (still needed for now)
-            services.AddScoped<TasksQueries>();
             services.Configure<RabbitMqOptions>(Configuration.GetSection(RabbitMqOptions.SectionName));
             services.AddSingleton<IWeeklyTaskReportPublisher, RabbitMqWeeklyTaskReportPublisher>();
-
-            // Register MediatR
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Startup).Assembly));
-
-            // Register FluentValidation
-            services.AddValidatorsFromAssembly(typeof(Startup).Assembly);
-
-            // Configure Mapster
-            MapsterConfig.ConfigureMapster();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

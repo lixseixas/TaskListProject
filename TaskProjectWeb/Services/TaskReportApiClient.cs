@@ -75,18 +75,17 @@ namespace TaskProject.Services
             }
         }
 
-        public async Task<List<SummarizedTasksModel>> GetSummarizedTasksAsync(DateTime initial, DateTime final)
+        public async Task<SearchTaskModel> GetSummarizedTasksAsync(DateTime initial, DateTime final)
         {
             try
             {
-                // The API does not currently expose a summarized endpoint; fallback to empty list
-                // Keep method for compatibility; if API adds endpoint, update the URL here.
-                return new List<SummarizedTasksModel>();
+                var resp = await _http.GetFromJsonAsync<SearchTaskModel>($"api/tasks/summarized?initialDate={initial:yyyy-MM-dd}&finalDate={final:yyyy-MM-dd}");
+                return resp ?? new SearchTaskModel { ListTasksSummarized = new List<SummarizedTasksModel>() };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error calling TaskReportApi GetSummarizedTasks");
-                return new List<SummarizedTasksModel>();
+                return new SearchTaskModel { ListTasksSummarized = new List<SummarizedTasksModel>() };
             }
         }
     }

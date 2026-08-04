@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using TaskListProject.Infrastructure.Data;
-using TaskProject.Models;
+using TaskReportApi.Models;
 using Mapster;
+using TaskProject.Domain.Entities;
 
-namespace TaskProject.CQRS.Tasks.Queries;
+namespace TaskReportApi.CQRS.Tasks.Queries;
 
 public class GetSummarizedTasksQueryHandler : IRequestHandler<GetSummarizedTasksQuery, SearchTaskModel>
 {
@@ -25,7 +26,7 @@ public class GetSummarizedTasksQueryHandler : IRequestHandler<GetSummarizedTasks
     {
         try
         {
-            var summarizedDtos = new List<TaskProject.Domain.Entities.SummarizedTasksDto>();
+            var summarizedDtos = new List<SummarizedTasksDto>();
             var success = _tasksQueries.GetSummarizedTasks(request.InitialDate, request.FinalDate, ref summarizedDtos);
 
             if (!success)

@@ -8,6 +8,8 @@ using TaskReportApi.Models;
 using TaskProject.Domain.Entities;
 using TaskListProject.Application;
 using TaskListProject.Infrastructure.Data;
+using MediatR;
+using TaskReportApi.CQRS.Tasks.Queries;
 
 namespace TaskReportApi.Controllers;
 
@@ -19,15 +21,18 @@ public class TasksController : ControllerBase
     private readonly TasksHandler _tasksHandler;
     private readonly TasksQueries _tasksQueries;
     private readonly ILogger<TasksController> _logger;
+    private readonly IMediator _mediator;
 
     public TasksController(
         TasksHandler tasksHandler,
         TasksQueries tasksQueries,
-        ILogger<TasksController> logger)
+        ILogger<TasksController> logger,
+        IMediator mediator)
     {
         _tasksHandler = tasksHandler;
         _tasksQueries = tasksQueries;
         _logger = logger;
+        _mediator = mediator;
     }
 
     [HttpGet]
@@ -180,6 +185,28 @@ public class TasksController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error validating superposition");
+            return StatusCode(500, "An error occurred");
+        }
+    }
+
+    [HttpGet("summarized")]
+    [ProducesResponseType(typeof(SearchTaskModel), 200)]
+    public async Task<ActionResult<SearchTaskModel>> GetSummarized([FromQuery] DateTime initialDate, [FromQuery] DateTime finalDate)
+    {
+        try
+        {
+            var query = new GetSummarizedTasksQuery
+            {
+                InitialDate = initialDate,
+                FinalDate = finalDate
+            };
+
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving summarized tasks");
             return StatusCode(500, "An error occurred");
         }
     }

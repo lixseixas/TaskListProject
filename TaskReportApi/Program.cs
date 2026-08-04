@@ -6,6 +6,9 @@ using TaskReportApi.Data;
 using TaskReportApi.Services;
 using TaskListProject.Infrastructure.Data;
 using TaskListProject.Application;
+using MediatR;
+using FluentValidation;
+using TaskReportApi.CQRS.Mapping;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -68,6 +71,15 @@ builder.Services.AddScoped<UserQueries>();
 builder.Services.AddScoped<LoginHandler>();
 builder.Services.AddScoped<TasksHandler>();
 builder.Services.AddScoped<TaskListProject.Infrastructure.Data.TasksQueries>();
+
+// Register MediatR
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
+// Register FluentValidation
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+
+// Configure Mapster
+MapsterConfig.ConfigureMapster();
 
 // Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();

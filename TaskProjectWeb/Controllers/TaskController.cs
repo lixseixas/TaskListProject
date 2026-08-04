@@ -16,25 +16,28 @@ namespace TaskProject.Controllers
     [Authorize]
     public class TaskController : Controller
     {
-        private readonly ILogger<TaskController> _logger;
-        private readonly IMediator _mediator;
-        private readonly IWeeklyTaskReportPublisher _weeklyTaskReportPublisher;
+    private readonly ILogger<TaskController> _logger;
+    private readonly IMediator _mediator;
+    private readonly IWeeklyTaskReportPublisher _weeklyTaskReportPublisher;
+    private readonly ITaskReportApiClient _apiClient;
 
         public TaskController(
             ILogger<TaskController> logger,
             IMediator mediator,
-            IWeeklyTaskReportPublisher weeklyTaskReportPublisher)
+            IWeeklyTaskReportPublisher weeklyTaskReportPublisher,
+            ITaskReportApiClient apiClient)
         {
             _logger = logger;
             _mediator = mediator;
             _weeklyTaskReportPublisher = weeklyTaskReportPublisher;
+            _apiClient = apiClient;
         }
 
         public async Task<IActionResult> List()
         {
             try
             {
-                var taskListModel = await _mediator.Send(new GetTasksQuery());
+                var taskListModel = await _apiClient.GetTasksAsync();
                 return View("List", taskListModel);
             }
             catch (Exception ex)
@@ -74,6 +77,7 @@ namespace TaskProject.Controllers
                 FinalDate = taskModel.FinalDate
             };
 
+            // Summarized tasks still powered by internal query handlers
             var result = await _mediator.Send(query);
             return Json(result);
         }
@@ -95,14 +99,9 @@ namespace TaskProject.Controllers
                 return View(taskModel);
             }
 
-            var command = new CreateTaskCommand { Task = taskModel };
-            
-            // Note: Task superposition validation needs to be implemented in the command handler
-            // For now, we'll skip this validation as it requires access to the database context
-
-            var result = await _mediator.Send(command);
-
-            if (!result)
+            // create via TaskReportApi
+            var created = await _apiClient.CreateTaskAsync(taskModel);
+            if (!created)
             {
                 return View("Error");
             }
@@ -112,8 +111,7 @@ namespace TaskProject.Controllers
 
         public async Task<IActionResult> Edit(Guid id)
         {
-            var query = new GetTaskByIdQuery { Id = id };
-            var taskModel = await _mediator.Send(query);
+            var taskModel = await _apiClient.GetTaskByIdAsync(id);
 
             if (taskModel == null || taskModel.Id == Guid.Empty)
             {
@@ -132,14 +130,8 @@ namespace TaskProject.Controllers
                 return View("Include", taskModel);
             }
 
-            var command = new UpdateTaskCommand { Task = taskModel };
-
-            // Note: Task superposition validation needs to be implemented in the command handler
-            // For now, we'll skip this validation as it requires access to the database context
-
-            var result = await _mediator.Send(command);
-
-            if (!result)
+            var updated = await _apiClient.UpdateTaskAsync(taskModel.Id, taskModel);
+            if (!updated)
             {
                 return View("Error");
             }

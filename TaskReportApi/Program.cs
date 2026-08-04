@@ -7,6 +7,7 @@ using TaskReportApi.Services;
 using TaskListProject.Infrastructure.Data;
 using TaskListProject.Application;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
@@ -65,6 +66,8 @@ builder.Services.AddDbContext<TaskListProject.Infrastructure.Data.TaskContext>(o
 builder.Services.AddScoped<TaskReportService>();
 builder.Services.AddScoped<UserQueries>();
 builder.Services.AddScoped<LoginHandler>();
+builder.Services.AddScoped<TasksHandler>();
+builder.Services.AddScoped<TaskListProject.Infrastructure.Data.TasksQueries>();
 
 // Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();

@@ -11,7 +11,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using TaskListProject.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using TaskListProject.Application;
 using TaskProject.Services;
 using MediatR;
 using FluentValidation;
@@ -46,11 +45,21 @@ namespace TaskProject
 
             services.AddAuthorization();
 
+            // Add IHttpContextAccessor for accessing user claims in DelegatingHandler
+            services.AddHttpContextAccessor();
+            services.AddTransient<JwtAuthHeaderHandler>();
+
             // Add framework services.
             services.AddMvc();
 
             // Register HttpClient for calling TaskReportApi
-            services.AddHttpClient();
+            // Register typed HttpClient to call TaskReportApi
+            services.AddHttpClient<ITaskReportApiClient, TaskReportApiClient>(client =>
+            {
+                var baseUrl = Configuration.GetValue<string>("TaskReportApi:Url") ?? "https://localhost:44322/";
+                client.BaseAddress = new Uri(baseUrl);
+            })
+            .AddHttpMessageHandler<JwtAuthHeaderHandler>();
 
             // Configure EF Core DbContext and repository for dependency injection
             services.AddDbContext<TaskContext>(options =>

@@ -3,7 +3,7 @@
     "Name": "New Profile",
     "Projects": [
       {
-        "Path": "TaskReportApi\\TaskReportApi.csproj",
+        "Path": "TaskReportApi\\TaskProjectApi.csproj",
         "Action": "Start"
       },
       {

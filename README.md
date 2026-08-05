@@ -13,7 +13,8 @@ The solution follows a layered architecture with clear separation of concerns:
 - **Domain Layer**: Core business entities and logic (TaskListProject.Domain)
 - **Infrastructure Layer**: Data access and external services (TaskListProject.InfraStructure)
 - **Application Layer**: Application services and CQRS handlers (TaskListProject.Application)
-- **Presentation Layer**: Web UI (TaskProjectWeb) and API (TaskReportApi)
+- **API Layer**: REST API with CQRS, data access, and business logic (TaskReportApi)
+- **Presentation Layer**: Web UI (TaskProjectWeb) - lightweight MVC application that consumes the API
 - **Frontend**: Angular client application (TaskListAngular)
 
 ## Technical Concepts
@@ -49,47 +50,62 @@ Domain-Driven Design principles are applied throughout the project:
 
 ### TaskProjectWeb
 
-ASP.NET Core MVC web application (.NET 10) serving as the main task management interface.
+ASP.NET Core MVC web application (.NET 10) serving as the main task management interface. This is a lightweight presentation layer that consumes the TaskReportApi for all data operations.
 
 **Features:**
 - Task CRUD operations with validation
-- User authentication via JWT tokens
+- User authentication via JWT tokens (cookie-based)
 - Task scheduling with time validation
 - Weekly task reporting
 - RabbitMQ integration for async processing
-- CQRS pattern implementation with MediatR
+- HTTP client with automatic JWT token injection
 
 **Key Functions:**
-- `List()`: Display all tasks with filtering
-- `Include()`: Create new tasks with validation
-- `Edit()`: Update existing tasks
-- `ListHoursPerDay()`: Summarize tasks by date range
+- `List()`: Display all tasks with filtering (calls API)
+- `Include()`: Create new tasks with validation (calls API)
+- `Edit()`: Update existing tasks (calls API)
+- `ListHoursPerDay()`: Summarize tasks by date range (calls API)
 - `SendWeeklyTaskReport()`: Publish weekly reports to RabbitMQ
 
 **Technology Stack:**
 - .NET 10
 - ASP.NET Core MVC
-- Entity Framework Core 10.0
-- MediatR 13.0
-- FluentValidation 11.3
-- Mapster 10.0
+- HttpClient with DelegatingHandler for JWT auth
 - RabbitMQ.Client 7.2
 - log4net 3.3
 
 ### TaskReportApi
 
-ASP.NET Core Web API (.NET 10) providing REST endpoints for task reporting.
+ASP.NET Core Web API (.NET 10) providing REST endpoints for task management and reporting. This is the central API layer that handles all data access, CQRS operations, and business logic.
 
 **Features:**
-- Weekly task report endpoints
-- JWT authentication
+- Task CRUD endpoints with CQRS pattern
+- Task summarization and reporting endpoints
+- JWT authentication and authorization
 - Swagger/OpenAPI documentation
-- CORS support for Angular frontend
+- CORS support for Angular frontend and TaskProjectWeb
+- Entity Framework Core for data access
+- MediatR for CQRS command/query handling
+- FluentValidation for request validation
+- Mapster for object mapping
 
 **Endpoints:**
-- `GET /api/taskreport/weekly`: Get weekly task reports
-- `POST /api/taskreport/weekly`: Create weekly task report
+- `GET /api/tasks`: Get all tasks
+- `GET /api/tasks/{id}`: Get task by ID
+- `POST /api/tasks`: Create new task
+- `PUT /api/tasks/{id}`: Update existing task
+- `GET /api/tasks/summarized`: Get summarized tasks by date range
+- `GET /api/tasks/validate-superposition`: Validate task time superposition
 - `POST /api/login`: Authenticate and get JWT token
+
+**Technology Stack:**
+- .NET 10
+- ASP.NET Core Web API
+- Entity Framework Core 10.0
+- MediatR 13.0
+- FluentValidation 11.3
+- Mapster 10.0
+- JWT Authentication
 
 ### TaskListAngular
 

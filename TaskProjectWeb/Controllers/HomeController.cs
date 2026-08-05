@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -97,8 +97,8 @@ namespace TaskProject.Controllers
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
-                // Redirect to Index on successful login
-                return RedirectToAction(nameof(Index));
+                // Redirect to Welcome on successful login
+                return RedirectToAction(nameof(Welcome));
             }
             catch (Exception ex)
             {
@@ -106,6 +106,36 @@ namespace TaskProject.Controllers
                 ModelState.AddModelError("", "An error occurred during login. Please try again.");
                 return View(userModel);
             }
+        }
+        [AllowAnonymous]
+        public IActionResult Welcome()
+        {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                ViewBag.Username = User.Identity.Name;
+                ViewBag.Message = "You have successfully logged in.";
+                ViewBag.IsLoggedIn = true;
+            }
+            else if (TempData["LoggedOutUser"] != null)
+            {
+                ViewBag.Username = TempData["LoggedOutUser"];
+                ViewBag.Message = "You have successfully logged out.";
+                ViewBag.IsLoggedIn = false;
+            }
+            else
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            return View();
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> Logout()
+        {
+            var username = User.Identity?.Name;
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            TempData["LoggedOutUser"] = username;
+            return RedirectToAction(nameof(Welcome));
         }
                 
         [AllowAnonymous]

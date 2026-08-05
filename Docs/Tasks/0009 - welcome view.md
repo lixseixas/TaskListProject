@@ -1,0 +1,1 @@
+create a welcome view after login and logout, showing the user name

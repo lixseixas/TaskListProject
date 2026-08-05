@@ -1,0 +1,29 @@
+@{
+    ViewData["Title"] = "Welcome";
+}
+
+<div class="text-center mt-5">
+    <h1 class="display-4">
+        @if (ViewBag.IsLoggedIn)
+        {
+            <text>Welcome, @ViewBag.Username!</text>
+        }
+        else
+        {
+            <text>Goodbye, @ViewBag.Username!</text>
+        }
+    </h1>
+    <p class="lead">@ViewBag.Message</p>
+    
+    <div class="mt-4">
+        @if (ViewBag.IsLoggedIn)
+        {
+            <a href="@Url.Action("List", "Task")" class="btn btn-primary">Go to Tasks</a>
+        }
+        else
+        {
+            <a href="@Url.Action("UserLogin", "Home")" class="btn btn-primary">Login Again</a>
+        }
+        <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">Home</a>
+    </div>
+</div>

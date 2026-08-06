@@ -33,7 +33,8 @@ The TaskListProject is a C# .NET solution consisting of multiple projects for ta
 
 1. **Read the selected task** from the `Docs/Tasks` folder
 2. **Analyze the code** from the perspective of a .NET analyst (using the `/cssharp` agent via `cssharp.agent.md`) or Angular analyst based on the task requirements
-3. **Ask the developer** if they want to implement the proposed changes
+3. **Create an Implementation Plan** and save it to the `TASKS` folder at the root of the project. The filename should be the same as the task name but with the suffix `-ip.md` (e.g., `0009 - welcomeview - ip.md`).
+4. **Ask the developer** if they want to implement the proposed changes
 
 ## Technical Debts and Roadmap
 

@@ -56,7 +56,13 @@ builder.Services.AddCors(options =>
                   .AllowAnyHeader()
                   .AllowAnyMethod();
 
-        
+            options.AddPolicy("AllowViteDev", policy =>
+            {
+                policy.WithOrigins("http://localhost:5173") // Default Vite URL
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
+            });
+
         });
 });
 
@@ -101,6 +107,7 @@ app.UseHttpsRedirection();
 
 // Enable CORS using the policy defined above
 app.UseCors("AllowAngularDev");
+app.UseCors("AllowViteDev");
 
 app.UseAuthentication();
 app.UseAuthorization();

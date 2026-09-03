@@ -1,0 +1,72 @@
+TaskListProjectReact
+Using react
+
+Subtask 1
+create a service to call
+call the endpoint /api/accountmovements/by-user/{userId} and show the results in a table
+curl -X 'GET' \
+  'https://localhost:44322/api/AccountMovements/by-user/785c2e15-8464-4cea-b30e-99faab345eb0?page=1&pageSize=10' \
+  -H 'accept: text/plain'
+
+Subtask 2
+  at TaskListProjectReact/src/App.tsx
+  remove 
+    <img class="base" width="170" height="179" alt="" src="/src/assets/hero.png">
+    Get started
+    <button type="button" class="counter">Count is 0</button>
+    
+Problably this part will desapear
+ <section id="center">
+        <div className="hero">
+          <img src={heroImg} className="base" width="170" height="179" alt="" />
+          <img src={reactLogo} className="framework" alt="React logo" />
+          <img src={viteLogo} className="vite" alt="Vite logo" />
+        </div>
+        <div>
+          <h1>Get started</h1>
+          <p>
+            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
+          </p>
+        </div>
+        <button
+          type="button"
+          className="counter"
+          onClick={() => setCount((count) => count + 1)}
+        >
+          Count is {count}
+        </button>
+
+Create a grid with the account movements data
+Json example
+{
+  "movements": [
+    {
+      "id": "2fe21d25-1474-4674-a80d-7dc3abcd325b",
+      "userId": "785c2e15-8464-4cea-b30e-99faab345eb0",
+      "amount": 10,
+      "type": "string",
+      "date": "2026-09-03T02:29:29.429",
+      "description": "string"
+    },
+    {
+      "id": "e306e1f9-d1a8-49d4-a382-9261b1af236b",
+      "userId": "785c2e15-8464-4cea-b30e-99faab345eb0",
+      "amount": 20,
+      "type": "string",
+      "date": "2026-09-03T02:29:29.429",
+      "description": "string 1"
+    },
+    {
+      "id": "7d27190d-96b9-4829-80f1-f20cd9dc82e2",
+      "userId": "785c2e15-8464-4cea-b30e-99faab345eb0",
+      "amount": -10,
+      "type": "string",
+      "date": "2026-09-03T02:29:29.429",
+      "description": "string 1"
+    }
+  ],
+  "totalCount": 3,
+  "page": 1,
+  "pageSize": 10,
+  "totalPages": 1
+}

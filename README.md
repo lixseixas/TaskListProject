@@ -20,6 +20,12 @@ Functionality includes:
 Exemplo inicial:
 ![Print tela exemplo](Print%20tela%20exemplo.png)
 
+AI Use:
+.devin folder contains:
+- Workflows that read .tasks folder and calls the cshar-developer agent
+.tasks folder contains:
+- Task files that describe the tasks to be done, like a primitive spec driven development approach
+- I commited this A.I files to show how we can use AI to develop this project.
 
 
 Instructions

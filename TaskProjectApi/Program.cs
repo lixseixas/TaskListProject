@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TaskReportApi.Data;
-using TaskReportApi.Services;
 using TaskListProject.Infrastructure.Data;
 using TaskListProject.Application;
 using MediatR;
@@ -72,11 +71,7 @@ builder.Services.AddDbContext<TaskListProject.Infrastructure.Data.TaskContext>(o
     options.UseSqlServer(connectionString));
 
 // Register services
-builder.Services.AddScoped<TaskReportService>();
-builder.Services.AddScoped<UserQueries>();
-builder.Services.AddScoped<LoginHandler>();
-builder.Services.AddScoped<TasksHandler>();
-builder.Services.AddScoped<TaskListProject.Infrastructure.Data.TasksQueries>();
+
 
 // Register MediatR
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));

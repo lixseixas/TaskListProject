@@ -14,7 +14,7 @@ namespace TaskListProject.Infrastructure.Data
             context.Database.EnsureCreated();
 
             // procura por qualquer agendamento
-            if (context.Tasks.Any())
+            if (context.AccountMovements.Any())
             {              
                 return;  //O banco foi inicializado
             }                

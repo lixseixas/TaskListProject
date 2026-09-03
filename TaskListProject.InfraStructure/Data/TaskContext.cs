@@ -12,18 +12,12 @@ namespace TaskListProject.Infrastructure.Data
         public TaskContext(DbContextOptions<TaskContext> options) : base(options)
         {       
         }
-
-        public DbSet<TaskDto> Tasks { get; set; }
-        public DbSet<UserLoginDto> UserLogins { get; set; }
-        public DbSet<WeeklyTaskReportDto> WeeklyTaskReports { get; set; }
+       
         public DbSet<AccountMovementDto> AccountMovements { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<TaskDto>().ToTable("Tasks");
-            modelBuilder.Entity<UserLoginDto>().ToTable("UserLogin");
-            modelBuilder.Entity<WeeklyTaskReportDto>().ToTable("WeeklyTaskReports");
-            modelBuilder.Entity<AccountMovementDto>().ToTable("AccountMovements");
+           modelBuilder.Entity<AccountMovementDto>().ToTable("AccountMovements");
         }
     }
 }

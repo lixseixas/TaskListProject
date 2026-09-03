@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using TaskReportApi.Data;
 using TaskListProject.Infrastructure.Data;
 using TaskListProject.Application;
 using MediatR;

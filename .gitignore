@@ -77,3 +77,5 @@ Thumbs.db
 /TaskListProject.InfraStructure/appsettings.json
 /TaskProjectWeb/appsettings.json
 /TaskReportApi/appsettings.json
+/TaskProjectApi/appsettings.Development.json
+/TaskProjectApi/appsettings.json

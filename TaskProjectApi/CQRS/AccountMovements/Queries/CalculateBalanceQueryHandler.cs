@@ -1,8 +1,7 @@
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq;
-using TaskListProject.Infrastructure.Data;
+using TaskListProject.Application.Data;
 using TaskProject.Domain.Entities;
 using TaskReportApi.Models;
 
@@ -10,12 +9,12 @@ namespace TaskReportApi.CQRS.AccountMovements.Queries;
 
 public class CalculateBalanceQueryHandler : IRequestHandler<CalculateBalanceQuery, AccountBalanceModel>
 {
-    private readonly TaskContext _context;
+    private readonly IAccountMovementRepository _movements;
     private readonly ILogger<CalculateBalanceQueryHandler> _logger;
 
-    public CalculateBalanceQueryHandler(TaskContext context, ILogger<CalculateBalanceQueryHandler> logger)
+    public CalculateBalanceQueryHandler(IAccountMovementRepository movements, ILogger<CalculateBalanceQueryHandler> logger)
     {
-        _context = context;
+        _movements = movements;
         _logger = logger;
     }
 
@@ -23,9 +22,7 @@ public class CalculateBalanceQueryHandler : IRequestHandler<CalculateBalanceQuer
     {
         try
         {
-            var movements = await _context.AccountMovements
-                .Where(m => m.UserId == request.UserId)
-                .ToListAsync(cancellationToken);
+            var movements = await _movements.GetByUserIdAsync(request.UserId, cancellationToken);
 
             decimal balance = 0;
 
@@ -46,11 +43,7 @@ public class CalculateBalanceQueryHandler : IRequestHandler<CalculateBalanceQuer
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error calculating balance for UserId {UserId}", request.UserId);
-            return new AccountBalanceModel
-            {
-                Balance = 0,
-                UserId = request.UserId
-            };
+            throw;
         }
     }
 }

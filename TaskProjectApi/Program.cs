@@ -1,10 +1,11 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using System.Text;
 using TaskReportApi.Services;
-using TaskListProject.Infrastructure.Data;
+using TaskListProject.Infrastructure;
 using TaskListProject.Application;
+using TaskReportApi.Configuration;
 using MediatR;
 using FluentValidation;
 using TaskReportApi.CQRS.Mapping;
@@ -65,17 +66,12 @@ builder.Services.AddCors(options =>
         });
 });
 
-// Configure Entity Framework
-var connectionString = builder.Configuration.GetConnectionString("LocalDbConnection");
-builder.Services.AddDbContext<TaskListProject.Infrastructure.Data.TaskContext>(options =>
-    options.UseSqlServer(connectionString));
+builder.Services.AddInfrastructure(builder.Configuration);
 
 // Register services
 builder.Services.AddScoped<TaskReportService>();
-builder.Services.AddScoped<UserQueries>();
 builder.Services.AddScoped<LoginHandler>();
 builder.Services.AddScoped<TasksHandler>();
-builder.Services.AddScoped<TaskListProject.Infrastructure.Data.TasksQueries>();
 
 // Register MediatR
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
@@ -91,6 +87,18 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "Task Report API", Version = "v1" });
+
+    c.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = JwtBearerDefaults.AuthenticationScheme,
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Paste the JWT token returned from the login endpoint."
+    });
+
+    c.OperationFilter<SwaggerBearerSecurityRequirementsOperationFilter>();
 });
 
 var app = builder.Build();

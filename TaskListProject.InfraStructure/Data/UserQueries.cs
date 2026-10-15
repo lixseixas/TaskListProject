@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TaskListProject.Application.Data;
 using Microsoft.IdentityModel.Protocols;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ using System.Text;
 
 namespace TaskListProject.Infrastructure.Data
 {
-    public class UserQueries
+    public class UserQueries : IUserQueries
     {
         private readonly TaskContext _context;
 
@@ -41,7 +42,7 @@ namespace TaskListProject.Infrastructure.Data
         }                
 
         // Changed: returns JWT token string when credentials are valid; null otherwise.
-        public string GetUserPassword(string userLogin, string password)
+        public string? GetUserPassword(string userLogin, string password)
         {
             var user = _context.UserLogins.Where(p => p.User == userLogin).FirstOrDefault();
 

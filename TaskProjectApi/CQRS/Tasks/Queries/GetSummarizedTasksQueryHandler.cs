@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using TaskListProject.Infrastructure.Data;
+using TaskListProject.Application.Data;
 using TaskReportApi.Models;
 using Mapster;
 using TaskProject.Domain.Entities;
@@ -13,10 +13,10 @@ namespace TaskReportApi.CQRS.Tasks.Queries;
 
 public class GetSummarizedTasksQueryHandler : IRequestHandler<GetSummarizedTasksQuery, SearchTaskModel>
 {
-    private readonly TasksQueries _tasksQueries;
+    private readonly ITasksQueries _tasksQueries;
     private readonly ILogger<GetSummarizedTasksQueryHandler> _logger;
 
-    public GetSummarizedTasksQueryHandler(TasksQueries tasksQueries, ILogger<GetSummarizedTasksQueryHandler> logger)
+    public GetSummarizedTasksQueryHandler(ITasksQueries tasksQueries, ILogger<GetSummarizedTasksQueryHandler> logger)
     {
         _tasksQueries = tasksQueries;
         _logger = logger;

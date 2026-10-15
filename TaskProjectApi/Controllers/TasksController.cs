@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using TaskReportApi.Models;
 using TaskProject.Domain.Entities;
 using TaskListProject.Application;
-using TaskListProject.Infrastructure.Data;
+using TaskListProject.Application.Data;
 using MediatR;
 using TaskReportApi.CQRS.Tasks.Queries;
 
@@ -19,13 +19,13 @@ namespace TaskReportApi.Controllers;
 public class TasksController : ControllerBase
 {
     private readonly TasksHandler _tasksHandler;
-    private readonly TasksQueries _tasksQueries;
+    private readonly ITasksQueries _tasksQueries;
     private readonly ILogger<TasksController> _logger;
     private readonly IMediator _mediator;
 
     public TasksController(
         TasksHandler tasksHandler,
-        TasksQueries tasksQueries,
+        ITasksQueries tasksQueries,
         ILogger<TasksController> logger,
         IMediator mediator)
     {

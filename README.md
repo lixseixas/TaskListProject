@@ -12,8 +12,8 @@ The solution follows a layered architecture with clear separation of concerns:
 
 - **Domain Layer**: Core business entities and logic (TaskListProject.Domain)
 - **Infrastructure Layer**: Data access and external services (TaskListProject.InfraStructure)
-- **Application Layer**: Application services and CQRS handlers (TaskListProject.Application)
-- **API Layer**: REST API with CQRS, data access, and business logic (TaskReportApi)
+- **Application Layer**: Application services and data-access interfaces (TaskListProject.Application)
+- **API Layer**: REST API with CQRS orchestration and request/response mapping (TaskReportApi)
 - **Presentation Layer**: Web UI (TaskProjectWeb) - lightweight MVC application that consumes the API
 - **Frontend**: Angular client application (TaskListAngular)
 
@@ -76,7 +76,7 @@ ASP.NET Core MVC web application (.NET 10) serving as the main task management i
 
 ### TaskReportApi
 
-ASP.NET Core Web API (.NET 10) providing REST endpoints for task management and reporting. This is the central API layer that handles all data access, CQRS operations, and business logic.
+ASP.NET Core Web API (.NET 10) providing REST endpoints for task management and reporting. API services and CQRS handlers use Application data-access interfaces; Infrastructure implements these interfaces and owns all database operations.
 
 **Features:**
 - Task CRUD endpoints with CQRS pattern
@@ -84,7 +84,7 @@ ASP.NET Core Web API (.NET 10) providing REST endpoints for task management and 
 - JWT authentication and authorization
 - Swagger/OpenAPI documentation
 - CORS support for Angular frontend and TaskProjectWeb
-- Entity Framework Core for data access
+- Infrastructure repositories for data access (no direct EF Core package references)
 - MediatR for CQRS command/query handling
 - FluentValidation for request validation
 - Mapster for object mapping
@@ -101,7 +101,6 @@ ASP.NET Core Web API (.NET 10) providing REST endpoints for task management and 
 **Technology Stack:**
 - .NET 10
 - ASP.NET Core Web API
-- Entity Framework Core 10.0
 - MediatR 13.0
 - FluentValidation 11.3
 - Mapster 10.0
@@ -145,12 +144,22 @@ Console application for consuming messages from RabbitMQ.
 - Database migrations
 - Data access queries (TasksQueries, UserQueries)
 - External service integrations
+- Implements Application data-access interfaces and registers SQL Server and repositories through `AddInfrastructure(configuration)`
+- Owns all EF Core packages; references Application and Domain
 
 **TaskListProject.Application**
 - CQRS command and query handlers
 - Application services
 - Business logic orchestration
 - Mapping configurations
+- Data-access interfaces; references Domain, not Infrastructure or EF Core
+
+EF Core remains a transitive runtime dependency of the API through Infrastructure.
+Database migrations remain in Infrastructure; this refactor does not change the schema.
+Run EF tooling against `TaskListProject.InfraStructure` using its existing design-time
+context factory, rather than the API as an EF design-time startup project.
+Account balance and movement-list queries now log and propagate database failures
+instead of returning a misleading zero balance or empty successful response.
 
 ## Getting Started
 

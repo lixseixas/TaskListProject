@@ -1,7 +1,6 @@
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using TaskListProject.Infrastructure.Data;
+using TaskListProject.Application.Data;
 using TaskProject.Domain.Entities;
 using TaskReportApi.Models;
 using Mapster;
@@ -10,12 +9,12 @@ namespace TaskReportApi.CQRS.AccountMovements.Commands;
 
 public class CreateMovementCommandHandler : IRequestHandler<CreateMovementCommand, AccountMovementModel>
 {
-    private readonly TaskContext _context;
+    private readonly IAccountMovementRepository _movements;
     private readonly ILogger<CreateMovementCommandHandler> _logger;
 
-    public CreateMovementCommandHandler(TaskContext context, ILogger<CreateMovementCommandHandler> logger)
+    public CreateMovementCommandHandler(IAccountMovementRepository movements, ILogger<CreateMovementCommandHandler> logger)
     {
-        _context = context;
+        _movements = movements;
         _logger = logger;
     }
 
@@ -24,9 +23,7 @@ public class CreateMovementCommandHandler : IRequestHandler<CreateMovementComman
         try
         {
             //get current balance
-            var currentBalance = await _context.AccountMovements
-                .Where(m => m.UserId == request.UserId)
-                .SumAsync(m => m.Amount, cancellationToken);
+            var currentBalance = await _movements.GetBalanceAsync(request.UserId, cancellationToken);
 
             //calculate if the new balance could be less than 0
             var newBalance = currentBalance + request.Amount;
@@ -45,8 +42,7 @@ public class CreateMovementCommandHandler : IRequestHandler<CreateMovementComman
                 Description = request.Description
             };
 
-            _context.AccountMovements.Add(movement);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _movements.AddAsync(movement, cancellationToken);
 
             var movementModel = movement.Adapt<AccountMovementModel>();
             

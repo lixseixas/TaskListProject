@@ -3,11 +3,11 @@
     "Name": "New Profile",
     "Projects": [
       {
-        "Path": "TaskReportApi\\TaskProjectApi.csproj",
+        "Path": "TaskProjectWeb\\TaskProjectWeb.csproj",
         "Action": "Start"
       },
       {
-        "Path": "TaskProjectWeb\\TaskProjectWeb.csproj",
+        "Path": "TaskProjectApi\\TaskProjectApi.csproj",
         "Action": "Start"
       }
     ]

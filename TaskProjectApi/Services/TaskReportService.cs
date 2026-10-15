@@ -1,8 +1,6 @@
-using Microsoft.EntityFrameworkCore;
-using TaskListProject.Infrastructure.Data;
+using TaskListProject.Application.Data;
 using TaskReportApi.Models;
 using TaskProject.Domain.Entities;
-using System.Globalization;
 
 namespace TaskReportApi.Services;
 
@@ -11,11 +9,11 @@ namespace TaskReportApi.Services;
 /// </summary>
 public class TaskReportService
 {
-    private readonly TaskListProject.Infrastructure.Data.TaskContext _context;
+    private readonly IWeeklyTaskReportRepository _reports;
 
-    public TaskReportService(TaskListProject.Infrastructure.Data.TaskContext context)
+    public TaskReportService(IWeeklyTaskReportRepository reports)
     {
-        _context = context;
+        _reports = reports;
     }
 
     /// <summary>
@@ -35,10 +33,7 @@ public class TaskReportService
         var normalizedEndDate = endDate.Date.AddDays(1).AddTicks(-1);
 
         // Get tasks within the date range
-        var tasks = await _context.WeeklyTaskReports
-            .Where(t => t.WeekStartDate >= normalizedStartDate && t.WeekEndDate <= normalizedEndDate)
-            .OrderBy(t => t.WeekStartDate)
-            .ToListAsync(cancellationToken);
+        var tasks = await _reports.GetAsync(normalizedStartDate, normalizedEndDate, cancellationToken);
 
         // Map to API model
         return tasks.Select(MapToModel).ToList();
@@ -77,8 +72,7 @@ public class TaskReportService
             dto = dto with { Id = Guid.NewGuid() };
         }
 
-        _context.WeeklyTaskReports.Add(dto);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _reports.AddAsync(dto, cancellationToken);
 
         return MapToModel(dto);
     }

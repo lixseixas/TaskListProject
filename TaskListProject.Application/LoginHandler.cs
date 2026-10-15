@@ -1,14 +1,14 @@
 using Microsoft.Extensions.Logging;
-using TaskListProject.Infrastructure.Data;
+using TaskListProject.Application.Data;
 
 namespace TaskListProject.Application;
 
 public class LoginHandler
 {
-    private readonly UserQueries _userQueries;
+    private readonly IUserQueries _userQueries;
     private readonly ILogger<LoginHandler> _logger;
 
-    public LoginHandler(UserQueries userQueries, ILogger<LoginHandler> logger)
+    public LoginHandler(IUserQueries userQueries, ILogger<LoginHandler> logger)
     {
         _userQueries = userQueries;
         _logger = logger;

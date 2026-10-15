@@ -1,8 +1,7 @@
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq;
-using TaskListProject.Infrastructure.Data;
+using TaskListProject.Application.Data;
 using TaskProject.Domain.Entities;
 using TaskReportApi.Models;
 using Mapster;
@@ -11,12 +10,12 @@ namespace TaskReportApi.CQRS.AccountMovements.Queries;
 
 public class GetMovementsByUserIdQueryHandler : IRequestHandler<GetMovementsByUserIdQuery, AccountMovementsResponseModel>
 {
-    private readonly TaskContext _context;
+    private readonly IAccountMovementRepository _movements;
     private readonly ILogger<GetMovementsByUserIdQueryHandler> _logger;
 
-    public GetMovementsByUserIdQueryHandler(TaskContext context, ILogger<GetMovementsByUserIdQueryHandler> logger)
+    public GetMovementsByUserIdQueryHandler(IAccountMovementRepository movements, ILogger<GetMovementsByUserIdQueryHandler> logger)
     {
-        _context = context;
+        _movements = movements;
         _logger = logger;
     }
 
@@ -24,16 +23,8 @@ public class GetMovementsByUserIdQueryHandler : IRequestHandler<GetMovementsByUs
     {
         try
         {
-            var query = _context.AccountMovements
-                .Where(m => m.UserId == request.UserId)
-                .OrderByDescending(m => m.Date);
-
-            var totalCount = await query.CountAsync(cancellationToken);
-            
-            var movements = await query
-                .Skip((request.Page - 1) * request.PageSize)
-                .Take(request.PageSize)
-                .ToListAsync(cancellationToken);
+            var (movements, totalCount) = await _movements.GetPageAsync(
+                request.UserId, request.Page, request.PageSize, cancellationToken);
 
             var movementModels = movements.Adapt<List<AccountMovementModel>>();
 
@@ -48,7 +39,7 @@ public class GetMovementsByUserIdQueryHandler : IRequestHandler<GetMovementsByUs
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving movements for UserId {UserId}", request.UserId);
-            return new AccountMovementsResponseModel();
+            throw;
         }
     }
 }

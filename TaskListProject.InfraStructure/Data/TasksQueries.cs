@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TaskListProject.Application.Data;
 using Microsoft.IdentityModel.Protocols;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ using System.Text;
 
 namespace TaskListProject.Infrastructure.Data
 {
-    public class TasksQueries
+    public class TasksQueries : ITasksQueries
     {
         private readonly TaskContext _context;
 

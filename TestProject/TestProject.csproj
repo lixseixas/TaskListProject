@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TaskListProject.InfraStructure\TaskListProject.InfraStructure.csproj" />
     <ProjectReference Include="..\TaskListProject.Domain\TaskListProject.Domain.csproj" />
+    <ProjectReference Include="..\TaskProjectApi\TaskProjectApi.csproj" />
   </ItemGroup>
 
 </Project>

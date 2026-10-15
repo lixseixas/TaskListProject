@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
-using TaskListProject.Infrastructure.Data;
+using TaskListProject.Application.Data;
 using TaskProject.Domain.Entities;
 
 namespace TaskListProject.Application
@@ -10,8 +8,8 @@ namespace TaskListProject.Application
     /// </summary>
     public class TasksHandler
     {
-        private readonly TasksQueries tasksDal;
-        public TasksHandler(TasksQueries tasksDal)
+        private readonly ITasksQueries tasksDal;
+        public TasksHandler(ITasksQueries tasksDal)
         {
             this.tasksDal = tasksDal ?? throw new ArgumentNullException(nameof(tasksDal));
         }

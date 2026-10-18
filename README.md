@@ -12,8 +12,8 @@ The solution follows a layered architecture with clear separation of concerns:
 
 - **Domain Layer**: Core business entities and logic (TaskListProject.Domain)
 - **Infrastructure Layer**: Data access and external services (TaskListProject.InfraStructure)
-- **Application Layer**: Application services and data-access interfaces (TaskListProject.Application)
-- **API Layer**: REST API with CQRS orchestration and request/response mapping (TaskReportApi)
+- **Application Layer**: CQRS requests, handlers, validators, results and data-access interfaces (TaskListProject.Application)
+- **API Layer**: REST controllers with HTTP request/response mapping (TaskProjectApi)
 - **Presentation Layer**: Web UI (TaskProjectWeb) - lightweight MVC application that consumes the API
 - **Frontend**: Angular client application (TaskListAngular)
 
@@ -27,6 +27,29 @@ CQRS is a pattern that separates read and write operations into different models
 - **Queries**: Operations that read data (GetTasksQuery, GetTaskByIdQuery, GetSummarizedTasksQuery)
 - **Handlers**: Process commands and queries using MediatR
 - **Benefits**: Improved performance, scalability, and maintainability by optimizing read and write paths independently
+
+All task, movement and weekly-report use cases live in Application, grouped by
+feature. `AddApplication()` registers their handlers and existing validators.
+Controllers send requests through `ISender` and map Application results to
+dedicated HTTP models; neither handlers nor their results depend on API models.
+Web keeps its own ViewModels and continues to call the same HTTP routes.
+
+Task persistence uses separate `ITasksQueries` and `ITasksCommands` ports,
+implemented by Infrastructure with scoped EF contexts and asynchronous I/O.
+Create and update are explicit commands, not a shared method controlled by an
+`Inclusion` string. Updates modify the tracked entity and return 404 when missing.
+Successful updates still return 204; creation returns the persisted ID in both
+the body and Location. DateTime fields and JSON wrappers remain unchanged for
+existing Web, React, Angular and consumer compatibility.
+
+Unexpected CQRS failures propagate to the API exception handler and return
+ProblemDetails with a trace ID instead of empty successful payloads. Existing
+business-rule rejections return 400. This is the minimum error-handling support
+for the CQRS migration, not completion of the broader error-handling roadmap.
+The existing validators are registered but a validation pipeline is deliberately
+deferred to TD-06: its positive-amount rule must first be reconciled with signed
+debits. Authentication/authorization changes, scheduling atomicity, pagination
+and generating weekly reports from tasks remain separate backlog items.
 
 ### DDD (Domain-Driven Design)
 
@@ -76,7 +99,7 @@ ASP.NET Core MVC web application (.NET 10) serving as the main task management i
 
 ### TaskReportApi
 
-ASP.NET Core Web API (.NET 10) providing REST endpoints for task management and reporting. API services and CQRS handlers use Application data-access interfaces; Infrastructure implements these interfaces and owns all database operations.
+ASP.NET Core Web API (.NET 10) providing REST endpoints for task management and reporting. Controllers delegate to Application CQRS handlers; Infrastructure implements Application data-access interfaces and owns all database operations.
 
 **Features:**
 - Task CRUD endpoints with CQRS pattern
@@ -86,23 +109,28 @@ ASP.NET Core Web API (.NET 10) providing REST endpoints for task management and 
 - CORS support for Angular frontend and TaskProjectWeb
 - Infrastructure repositories for data access (no direct EF Core package references)
 - MediatR for CQRS command/query handling
-- FluentValidation for request validation
+- FluentValidation validators in Application (pipeline integration planned in TD-06)
 - Mapster for object mapping
 
 **Endpoints:**
 - `GET /api/tasks`: Get all tasks
 - `GET /api/tasks/{id}`: Get task by ID
-- `POST /api/tasks`: Create new task
+- `POST /api/tasks/include`: Create new task
 - `PUT /api/tasks/{id}`: Update existing task
 - `GET /api/tasks/summarized`: Get summarized tasks by date range
 - `GET /api/tasks/validate-superposition`: Validate task time superposition
 - `POST /api/login`: Authenticate and get JWT token
+- `GET /api/TaskReport/weekly`: Read persisted weekly report snapshots
+- `POST /api/TaskReport/weekly`: Insert a weekly report snapshot
+- `GET /api/AccountMovements/by-user/{userId}`: Get a movement page
+- `POST /api/AccountMovements`: Create a movement
+- `GET /api/AccountMovements/balance/{userId}`: Calculate balance
 
 **Technology Stack:**
 - .NET 10
 - ASP.NET Core Web API
-- MediatR 13.0
-- FluentValidation 11.3
+- MediatR 14.2
+- FluentValidation 11.11
 - Mapster 10.0
 - JWT Authentication
 
@@ -145,7 +173,7 @@ Console application for consuming messages from RabbitMQ.
 - Data access queries (TasksQueries, UserQueries)
 - External service integrations
 - Implements Application data-access interfaces and registers SQL Server and repositories through `AddInfrastructure(configuration)`
-- Owns all EF Core packages; references Application and Domain
+- Owns production EF Core packages; references Application and Domain (tests also use EF Core SQLite)
 
 **TaskListProject.Application**
 - CQRS command and query handlers
@@ -187,9 +215,9 @@ cd TaskProjectWeb
 dotnet run
 ```
 
-**TaskReportApi:**
+**TaskProjectApi:**
 ```bash
-cd TaskReportApi
+cd TaskProjectApi
 dotnet run
 ```
 
@@ -222,7 +250,28 @@ dotnet run
 
 ## Development Roadmap
 
-See [technical-debts.md](Docs/technical-debts.md) for detailed technical debts and improvement roadmap.
+See [technicalDebits.md](.Tasks/technicalDebits.md) for technical debts and the implementation roadmap.
+
+## CQRS verification
+
+Run the focused boundary, persistence and HTTP contract tests:
+
+```powershell
+dotnet test TestProject\TestProject.csproj --filter "FullyQualifiedName~DataAccessBoundaryTests|FullyQualifiedName~DbTests|FullyQualifiedName~CqrsApiTests"
+dotnet build TaskProjectWeb\TaskProjectWeb.csproj --no-restore
+```
+
+The HTTP tests host the real API, mediator, JWT validation and task/report
+persistence using an isolated SQLite database; movement persistence is stubbed.
+They cover routes, JSON fields, OpenAPI, create/read/update, missing resources,
+rule rejection and database failures. SQLite does not replace SQL Server
+concurrency/migration tests (TD-07/TD-11). Legacy `AccountMovementsTests` still
+creates a context without a provider and is not included in this focused suite.
+Existing dependency-audit and nullable warnings are not resolved by TD-05.
+
+For manual checks, use [TaskReportApi.http](TaskProjectApi/TaskReportApi.http).
+Replace the login credentials, token and IDs with local values. No database
+migration or new runtime configuration is required by this CQRS refactor.
 
 ## License
 

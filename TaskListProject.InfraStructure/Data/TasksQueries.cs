@@ -1,260 +1,80 @@
 using Microsoft.EntityFrameworkCore;
 using TaskListProject.Application.Data;
-using Microsoft.IdentityModel.Protocols;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Threading.Tasks;
 using TaskProject.Domain.Entities;
-using Microsoft.Extensions.Configuration;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
-namespace TaskListProject.Infrastructure.Data
+namespace TaskListProject.Infrastructure.Data;
+
+public sealed class TasksQueries(TaskContext context) : ITasksQueries
 {
-    public class TasksQueries : ITasksQueries
+    public async Task<List<TaskDto>> GetAllAsync(CancellationToken cancellationToken)
     {
-        private readonly TaskContext _context;
-
-        // Keep parameterless constructor for tests or callers that rely on it.
-        public TasksQueries()
+        var tasks = await context.Tasks.AsNoTracking().OrderBy(task => task.Date).ToListAsync(cancellationToken);
+        foreach (var task in tasks)
         {
-            _context = GetContext();
-        }
-
-        // Constructor for dependency injection - allows the DbContext to be provided by the DI container.
-        public TasksQueries(TaskContext context)
-        {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-        }
-
-
-       protected TaskContext GetContext()
-        {
-            var optionsBuilder = new DbContextOptionsBuilder<TaskContext>();
-            var dbLocation = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("ConnectionStrings")["LocalDbConnection"];
-
-            optionsBuilder.UseSqlServer(dbLocation);
-            return new TaskContext(optionsBuilder.Options);
-        }
-
-        public bool AddTask( TaskDto taskDto)
-        {
-            try
+            task.PriorityName = task.Priority switch
             {
-                if (taskDto.Inclusion == "edit")
+                3 => "High",
+                2 => "Medium",
+                1 => "Low",
+                _ => string.Empty
+            };
+        }
+
+        return tasks;
+    }
+
+    public Task<TaskDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return context.Tasks.AsNoTracking().SingleOrDefaultAsync(task => task.Id == id, cancellationToken);
+    }
+
+    public async Task<List<SummarizedTasksDto>> GetSummarizedAsync(
+        DateTime initialDate, DateTime finalDate, CancellationToken cancellationToken)
+    {
+        var end = finalDate.AddHours(23).AddMinutes(59);
+        var tasks = await context.Tasks.AsNoTracking()
+            .Where(task => task.Date >= initialDate && task.Date <= end)
+            .OrderBy(task => task.Date)
+            .ToListAsync(cancellationToken);
+        var result = new List<SummarizedTasksDto>();
+
+        foreach (var day in tasks.GroupBy(task => task.Date))
+        {
+            var totalHours = TimeSpan.Zero;
+            var completedHours = TimeSpan.Zero;
+            foreach (var task in day)
+            {
+                var hours = DateTime.Parse(task.FinalHour.ToShortTimeString())
+                    - DateTime.Parse(task.InitialHour.ToShortTimeString());
+                totalHours += hours;
+                if (task.Ended)
                 {
-                    TaskDto obtainedTaskDto = new TaskDto();
-
-                    GetTask(taskDto.Id, ref obtainedTaskDto);     
-                    obtainedTaskDto.Description = taskDto.Description;
-                    obtainedTaskDto.Date = taskDto.Date;
-                    obtainedTaskDto.Title = taskDto.Title;
-                    obtainedTaskDto.InitialHour = taskDto.InitialHour;
-                    obtainedTaskDto.FinalHour = taskDto.FinalHour;
-                    obtainedTaskDto.Priority = taskDto.Priority;
-                    obtainedTaskDto.Ended = taskDto.Ended;
-                    _context.SaveChanges();
+                    completedHours += hours;
                 }
-                else
-                {
-                    _context.Tasks.Add(taskDto);
-                    _context.SaveChanges();
-                }
-
-                return true;
             }
-            catch (Exception)
+
+            result.Add(new SummarizedTasksDto
             {
-
-                return false;
-            }           
-
+                Date = day.Key,
+                Hours = totalHours.ToString(),
+                TotalTasks = day.Count(),
+                AverageHours = (totalHours / day.Count()).ToString(),
+                PercentualConcludedTasks = Math.Round(completedHours.TotalMinutes / totalHours.TotalMinutes * 100)
+            });
         }
 
-        public bool GetTasks(ref List<TaskDto> taskList)
-        {
-            try
-            {
-                taskList = _context.Tasks.OrderBy(p => p.Date).ToList();
+        return result;
+    }
 
-                foreach (var item in taskList)
-                {
-                    switch (item.Priority)
-                    {
-                        case 3:
-                            item.PriorityName = "High";
-                            break;
-                        case 2:
-                            item.PriorityName = "Medium";
-                            break;
-                        case 1:
-                            item.PriorityName = "Low";
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
-
-                return true;
-            }
-            catch (Exception)
-            {
-
-                return false;
-            }                         
-
-        }
-
-        public bool GetSummarizedTasks(DateTime dataInicial, DateTime dataFinal, ref List<SummarizedTasksDto> consolidatedList)
-        {
-            try
-            {
-                dataFinal = dataFinal.AddHours(23).AddMinutes(59);
-
-                List<TaskDto> taskList = _context.Tasks.Where(p => p.Date >= dataInicial
-                                                                   && p.Date <= dataFinal)
-                                                                .OrderBy(p => p.Date)
-                                                                .ToList();
-
-                //daily total hours
-                var summarizedListPerDay = taskList.GroupBy(p => p.Date).ToList();
-
-                foreach (var item in summarizedListPerDay)
-                {
-                    SummarizedTasksDto summarized = new SummarizedTasksDto();
-
-                    TimeSpan totalHours = new TimeSpan();
-                    TimeSpan totalHoursConcluded = new TimeSpan();
-
-                    foreach (var tarefa in item)
-                    {
-                        TimeSpan hoursTarefa = DateTime.Parse(tarefa.FinalHour.ToShortTimeString()).Subtract(DateTime.Parse(tarefa.InitialHour.ToShortTimeString()));
-                        totalHours = totalHours + hoursTarefa;
-
-                        if (tarefa.Ended == true)
-                        {
-                            totalHoursConcluded = totalHoursConcluded + hoursTarefa;
-                        }
-                    }
-
-                    summarized.Date = item.FirstOrDefault().Date;
-                    summarized.Hours = totalHours.ToString();
-                    summarized.TotalTasks = item.Count();
-                    summarized.AverageHours = Convert.ToString(totalHours / item.Count());
-
-                    //calculating percentual
-                    double minutesTotal = totalHours.TotalMinutes;
-                    double minutesConcluded = totalHoursConcluded.TotalMinutes;
-                    double diference = minutesConcluded / minutesTotal;
-
-                    summarized.PercentualConcludedTasks = diference = Math.Round(diference * 100);
-
-                    consolidatedList.Add(summarized);
-                }
-
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-
-
-        }
-
-        public bool GetTask(Guid id, ref TaskDto taskDto)
-        {
-            var taskList = _context.Tasks.Where(p => p.Id == id).ToList();
-
-            if (taskList != null && taskList.Count > 0)
-            {
-               
-                var found = taskList.FirstOrDefault();
-                if (found != null)
-                {
-                    taskDto.Id = found.Id;
-                    taskDto.Title = found.Title;
-                    taskDto.Description = found.Description;
-                    taskDto.Date = found.Date;
-                    taskDto.InitialHour = found.InitialHour;
-                    taskDto.FinalHour = found.FinalHour;
-                    taskDto.Priority = found.Priority;
-                    taskDto.PriorityName = found.PriorityName;
-                    taskDto.Ended = found.Ended;
-                    taskDto.Inclusion = found.Inclusion;
-                }
-                return true;
-            }
-            else
-            {
-                return false;
-            }         
-
-        }       
-        
-
-        public bool ValidateTaskSuperposition(Guid idAgendamento, DateTime data, DateTime dataInicial, DateTime dataFinal)
-        {
-            TaskDto itemFound = new TaskDto();
-            
-            //filter all of tasks with the same date and diferente id
-            var listaFiltrada = _context.Tasks.Where(p => p.Date >= data && p.Id != idAgendamento)
-                                                                .OrderBy(p => p.Date).ToList();
-                       
-            if (listaFiltrada == null) 
-            {
-                return true;
-            }
-
-            // find task with initial hour
-            itemFound = listaFiltrada.Where(p => p.InitialHour <= dataInicial
-                                 && p.FinalHour >= dataInicial).FirstOrDefault();
-
-            if (itemFound != null) 
-            {               
-                return false;
-            }
-            else
-            {
-                // find task with final hour
-                itemFound = listaFiltrada.Where(p => p.InitialHour <= dataFinal
-                                 && p.FinalHour >= dataFinal).FirstOrDefault();
-            }
-
-            if (itemFound != null) 
-            {                
-                return false;
-            }
-            else
-            {
-                // find task in the database
-                itemFound = listaFiltrada.Where(p => p.InitialHour <= dataInicial
-                    && p.FinalHour >= dataFinal ).FirstOrDefault();
-            }
-            if (itemFound != null)  
-            {               
-                return false;
-            }
-            else
-            {
-                // find task between other test
-                itemFound = listaFiltrada.Where(p => p.InitialHour >= dataInicial
-                    && p.FinalHour <= dataFinal ).FirstOrDefault();
-
-            }
-            if (itemFound != null)  
-            {               
-                return false;
-            }
-
-            return true;
-
-        }
-
+    public async Task<bool> IsTimeAvailableAsync(
+        Guid id, DateTime date, DateTime initial, DateTime final, CancellationToken cancellationToken)
+    {
+        // Preserve the existing date and inclusive-boundary rules; scheduling changes belong to TD-07.
+        return !await context.Tasks.AnyAsync(task =>
+            task.Date >= date && task.Id != id &&
+            ((task.InitialHour <= initial && task.FinalHour >= initial) ||
+             (task.InitialHour <= final && task.FinalHour >= final) ||
+             (task.InitialHour <= initial && task.FinalHour >= final) ||
+             (task.InitialHour >= initial && task.FinalHour <= final)), cancellationToken);
     }
 }

@@ -1,34 +1,32 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TaskReportApi.Models;
 
 /// <summary>
 /// Represents a task in the system
 /// </summary>
-[Table("Tasks")]
-public class TaskModel
+public sealed record TaskModel
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
     [Required]
-    public string Title { get; set; } = string.Empty;
+    public string Title { get; init; } = string.Empty;
 
     [Required]
-    public string Description { get; set; } = string.Empty;
+    public string Description { get; init; } = string.Empty;
 
     [Required]
-    public DateTime Date { get; set; }
+    public DateTime Date { get; init; }
 
     [Required]
-    public DateTime InitialHour { get; set; }
+    public DateTime InitialHour { get; init; }
 
     [Required]
-    public DateTime FinalHour { get; set; }
+    public DateTime FinalHour { get; init; }
 
     [Required]
-    public int Priority { get; set; }
+    public int Priority { get; init; }
 
     [Required]
-    public bool Ended { get; set; }
+    public bool Ended { get; init; }
 }

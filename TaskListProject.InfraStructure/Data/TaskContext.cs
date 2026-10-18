@@ -21,6 +21,7 @@ namespace TaskListProject.Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<TaskDto>().ToTable("Tasks");
+            modelBuilder.Entity<TaskDto>().Ignore(task => task.PriorityName);
             modelBuilder.Entity<UserLoginDto>().ToTable("UserLogin");
             modelBuilder.Entity<WeeklyTaskReportDto>().ToTable("WeeklyTaskReports");
             modelBuilder.Entity<AccountMovementDto>().ToTable("AccountMovements");

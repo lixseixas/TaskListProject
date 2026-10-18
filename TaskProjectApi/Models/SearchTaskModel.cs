@@ -3,9 +3,10 @@ using System.Collections.Generic;
 
 namespace TaskReportApi.Models;
 
-public class SearchTaskModel
+/// <summary>Represents task summaries for the requested date interval.</summary>
+public sealed record SearchTaskModel
 {
-    public DateTime InitialDate { get; set; }
-    public DateTime FinalDate { get; set; }
-    public List<SummarizedTasksModel> ListTasksSummarized { get; set; } = new();
+    public DateTime InitialDate { get; init; }
+    public DateTime FinalDate { get; init; }
+    public List<SummarizedTasksModel> ListTasksSummarized { get; init; } = new();
 }

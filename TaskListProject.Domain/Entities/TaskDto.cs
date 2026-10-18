@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TaskProject.Domain.Entities
 {
@@ -35,14 +34,11 @@ namespace TaskProject.Domain.Entities
         public int Priority { get; set; }
 
         [Display(Name = "Priority")]
-        [NotMapped]
         public string PriorityName { get; set; }
 
         [Required]
         [Display(Name = "Ended")]
         public bool Ended { get; set; }
 
-        [NotMapped]
-        public string Inclusion { get; set; }
     }
 }

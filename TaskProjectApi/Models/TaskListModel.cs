@@ -2,7 +2,8 @@ using System.Collections.Generic;
 
 namespace TaskReportApi.Models;
 
-public class TaskListModel
+/// <summary>Represents the task list returned by the API.</summary>
+public sealed record TaskListModel
 {
-    public List<TaskModel> TaskList { get; set; } = new();
+    public List<TaskModel> TaskList { get; init; } = new();
 }

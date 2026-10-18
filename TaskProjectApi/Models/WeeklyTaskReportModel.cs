@@ -3,9 +3,9 @@ namespace TaskReportApi.Models;
 /// <summary>
 /// Represents a weekly task report entry showing task counts per week
 /// </summary>
-public record WeeklyTaskReportModel
+public sealed record WeeklyTaskReportModel
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
     /// <summary>
     /// The start date of the week

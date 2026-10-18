@@ -18,6 +18,7 @@ public static class DependencyInjection
 
         services.AddDbContext<TaskContext>(options => options.UseSqlServer(connectionString));
         services.AddScoped<ITasksQueries, TasksQueries>();
+        services.AddScoped<ITasksCommands, TasksCommands>();
         services.AddScoped<IUserQueries, UserQueries>();
         services.AddScoped<IWeeklyTaskReportRepository, WeeklyTaskReportRepository>();
         services.AddScoped<IAccountMovementRepository, AccountMovementRepository>();

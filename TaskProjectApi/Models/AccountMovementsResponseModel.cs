@@ -2,11 +2,12 @@ using System;
 
 namespace TaskReportApi.Models;
 
-public class AccountMovementsResponseModel
+/// <summary>Represents a page of account movements with pagination metadata.</summary>
+public sealed record AccountMovementsResponseModel
 {
-    public List<AccountMovementModel> Movements { get; set; } = new();
-    public int TotalCount { get; set; }
-    public int Page { get; set; }
-    public int PageSize { get; set; }
+    public List<AccountMovementModel> Movements { get; init; } = new();
+    public int TotalCount { get; init; }
+    public int Page { get; init; }
+    public int PageSize { get; init; }
     public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
 }

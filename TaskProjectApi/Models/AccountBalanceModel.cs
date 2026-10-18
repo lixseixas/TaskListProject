@@ -1,7 +1,8 @@
 namespace TaskReportApi.Models;
 
-public class AccountBalanceModel
+/// <summary>Represents the calculated balance of a user.</summary>
+public sealed record AccountBalanceModel
 {
-    public decimal Balance { get; set; }
-    public Guid UserId { get; set; }
+    public decimal Balance { get; init; }
+    public Guid UserId { get; init; }
 }

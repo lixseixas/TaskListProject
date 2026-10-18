@@ -1,6 +1,106 @@
-@TaskReportApi_HostAddress = http://localhost:5274
+@baseUrl = http://localhost:5274
+@token = paste-token-returned-by-login
+@taskId = 11111111-1111-1111-1111-111111111111
+@userId = 22222222-2222-2222-2222-222222222222
 
-GET {{TaskReportApi_HostAddress}}/weatherforecast/
-Accept: application/json
+### Login with an existing local user
+POST {{baseUrl}}/api/login
+Content-Type: application/json
 
-###
+{
+  "user": "replace-with-local-user",
+  "password": "replace-with-local-password"
+}
+
+### List tasks (preserves the taskList wrapper)
+GET {{baseUrl}}/api/tasks
+Authorization: Bearer {{token}}
+
+### Create a task using the existing include route
+POST {{baseUrl}}/api/tasks/include
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "id": "{{taskId}}",
+  "title": "Review CQRS",
+  "description": "Review application boundaries",
+  "date": "2026-10-17T00:00:00",
+  "initialHour": "2026-10-17T09:00:00",
+  "finalHour": "2026-10-17T10:00:00",
+  "priority": 1,
+  "ended": false
+}
+
+### Read a task
+GET {{baseUrl}}/api/tasks/{{taskId}}
+Authorization: Bearer {{token}}
+
+### Update a task (204); the route ID takes precedence over the body ID
+PUT {{baseUrl}}/api/tasks/{{taskId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "id": "{{taskId}}",
+  "title": "Review CQRS",
+  "description": "Application boundaries reviewed",
+  "date": "2026-10-17T00:00:00",
+  "initialHour": "2026-10-17T09:00:00",
+  "finalHour": "2026-10-17T10:00:00",
+  "priority": 2,
+  "ended": true
+}
+
+### Missing task (404)
+GET {{baseUrl}}/api/tasks/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{token}}
+
+### Summarized tasks
+GET {{baseUrl}}/api/tasks/summarized?initialDate=2026-10-12&finalDate=2026-10-18
+Authorization: Bearer {{token}}
+
+### Time availability (true means available)
+GET {{baseUrl}}/api/tasks/validate-superposition?id={{taskId}}&date=2026-10-17&initial=2026-10-17T09:00:00&final=2026-10-17T10:00:00
+Authorization: Bearer {{token}}
+
+### Read persisted weekly reports (does not generate new summaries)
+GET {{baseUrl}}/api/TaskReport/weekly?startDate=2026-10-12&endDate=2026-10-18
+Authorization: Bearer {{token}}
+
+### Insert a weekly report snapshot
+POST {{baseUrl}}/api/TaskReport/weekly
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "weekStartDate": "2026-10-12T00:00:00",
+  "weekEndDate": "2026-10-18T00:00:00",
+  "weekNumber": 42,
+  "year": 2026,
+  "totalTasks": 10,
+  "completedTasks": 8,
+  "pendingTasks": 2,
+  "completionPercentage": 80
+}
+
+### Create a movement (use an existing user ID)
+POST {{baseUrl}}/api/AccountMovements
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "amount": 100,
+  "type": "Credit",
+  "date": "2026-10-17T00:00:00",
+  "description": "Initial credit"
+}
+
+### List movements
+GET {{baseUrl}}/api/AccountMovements/by-user/{{userId}}?page=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### Calculate balance
+GET {{baseUrl}}/api/AccountMovements/balance/{{userId}}
+Authorization: Bearer {{token}}

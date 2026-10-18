@@ -1,24 +1,23 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TaskReportApi.Models;
 
-[Table("AccountMovements")]
-public class AccountMovementModel
+/// <summary>Represents a movement returned by the API.</summary>
+public sealed record AccountMovementModel
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
     [Required]
-    public Guid UserId { get; set; }
+    public Guid UserId { get; init; }
 
     [Required]
-    public decimal Amount { get; set; }
+    public decimal Amount { get; init; }
 
     [Required]
-    public string Type { get; set; } = string.Empty;
+    public string Type { get; init; } = string.Empty;
 
     [Required]
-    public DateTime Date { get; set; }
+    public DateTime Date { get; init; }
 
-    public string? Description { get; set; }
+    public string? Description { get; init; }
 }

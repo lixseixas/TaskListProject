@@ -2,19 +2,18 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
-using TaskReportApi.Services;
 using TaskListProject.Infrastructure;
 using TaskListProject.Application;
 using TaskReportApi.Configuration;
-using MediatR;
-using FluentValidation;
-using TaskReportApi.CQRS.Mapping;
+using TaskReportApi.Middleware;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 
 // Add JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"];
@@ -68,19 +67,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// Register services
-builder.Services.AddScoped<TaskReportService>();
-builder.Services.AddScoped<LoginHandler>();
-builder.Services.AddScoped<TasksHandler>();
-
-// Register MediatR
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
-
-// Register FluentValidation
-builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
-
-// Configure Mapster
-MapsterConfig.ConfigureMapster();
+builder.Services.AddApplication();
 
 // Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -102,6 +89,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
@@ -122,3 +110,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program;

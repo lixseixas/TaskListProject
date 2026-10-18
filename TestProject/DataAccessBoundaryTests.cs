@@ -7,10 +7,17 @@ using TaskListProject.Application.Data;
 using TaskListProject.Infrastructure;
 using TaskListProject.Infrastructure.Data;
 using TaskProject.Domain.Entities;
-using TaskReportApi.CQRS.AccountMovements.Commands;
-using TaskReportApi.CQRS.AccountMovements.Queries;
-using TaskReportApi.Models;
-using TaskReportApi.Services;
+using TaskListProject.Application.AccountMovements.Commands;
+using TaskListProject.Application.AccountMovements.Queries;
+using TaskListProject.Application.Common;
+using TaskListProject.Application.Tasks.Commands;
+using TaskListProject.Application.Tasks.Queries;
+using TaskListProject.Application.WeeklyTaskReports.Commands;
+using TaskListProject.Application.WeeklyTaskReports.Queries;
+using MediatR;
+using FluentValidation;
+using Microsoft.EntityFrameworkCore;
+using TaskReportApi.Controllers;
 
 namespace TestProject;
 
@@ -26,9 +33,7 @@ public class DataAccessBoundaryTests
         var services = new ServiceCollection();
         services.AddLogging();
         services.AddInfrastructure(configuration);
-        services.AddScoped<LoginHandler>();
-        services.AddScoped<TasksHandler>();
-        services.AddScoped<TaskReportService>();
+        services.AddApplication();
         using var provider = services.BuildServiceProvider(new ServiceProviderOptions
         {
             ValidateOnBuild = true,
@@ -40,10 +45,13 @@ public class DataAccessBoundaryTests
         Assert.That(scope.ServiceProvider.GetRequiredService<IWeeklyTaskReportRepository>(), Is.SameAs(first));
         Assert.That(scope.ServiceProvider.GetRequiredService<IAccountMovementRepository>(), Is.TypeOf<AccountMovementRepository>());
         Assert.That(scope.ServiceProvider.GetRequiredService<ITasksQueries>(), Is.TypeOf<TasksQueries>());
+        Assert.That(scope.ServiceProvider.GetRequiredService<ITasksCommands>(), Is.TypeOf<TasksCommands>());
         Assert.That(scope.ServiceProvider.GetRequiredService<IUserQueries>(), Is.TypeOf<UserQueries>());
         Assert.That(scope.ServiceProvider.GetRequiredService<LoginHandler>(), Is.Not.Null);
-        Assert.That(scope.ServiceProvider.GetRequiredService<TasksHandler>(), Is.Not.Null);
-        Assert.That(scope.ServiceProvider.GetRequiredService<TaskReportService>(), Is.Not.Null);
+        Assert.That(scope.ServiceProvider.GetRequiredService<IRequestHandler<CreateTaskCommand, TaskListProject.Application.Tasks.TaskResult>>(),
+            Is.TypeOf<CreateTaskCommandHandler>());
+        Assert.That(scope.ServiceProvider.GetRequiredService<IValidator<GetSummarizedTasksQuery>>(),
+            Is.TypeOf<GetSummarizedTasksQueryValidator>());
         using var otherScope = provider.CreateScope();
         Assert.That(otherScope.ServiceProvider.GetRequiredService<IWeeklyTaskReportRepository>(), Is.Not.SameAs(first));
     }
@@ -56,11 +64,54 @@ public class DataAccessBoundaryTests
     }
 
     [Test]
+    public void SqlServerModelStillMatchesMigrationsSnapshot()
+    {
+        var options = new DbContextOptionsBuilder<TaskContext>()
+            .UseSqlServer("Server=unused;Database=unused;Trusted_Connection=True").Options;
+        using var context = new TaskContext(options);
+        Assert.That(context.Database.HasPendingModelChanges(), Is.False);
+    }
+
+    [Test]
     public void ApplicationHasNoInfrastructureOrEfAssemblyReferences()
     {
-        var references = typeof(TasksHandler).Assembly.GetReferencedAssemblies().Select(a => a.Name).ToList();
+        var references = typeof(CreateTaskCommand).Assembly.GetReferencedAssemblies().Select(a => a.Name).ToList();
         Assert.That(references, Has.None.EqualTo("TaskListProject.InfraStructure"));
+        Assert.That(references, Has.None.EqualTo("TaskProjectApi"));
+        Assert.That(references, Has.None.EqualTo("TaskProjectWeb"));
         Assert.That(references.Any(n => n != null && n.StartsWith("Microsoft.EntityFrameworkCore")), Is.False);
+    }
+
+    [Test]
+    public void CqrsHandlersBelongToApplicationAndControllersOnlyDependOnSender()
+    {
+        var application = typeof(CreateTaskCommand).Assembly;
+        var api = typeof(TasksController).Assembly;
+        var handlers = application.GetTypes().Where(type => type.GetInterfaces().Any(contract =>
+            contract.IsGenericType && contract.GetGenericTypeDefinition() == typeof(IRequestHandler<,>))).ToList();
+        Assert.That(handlers.Count, Is.GreaterThanOrEqualTo(11));
+        foreach (var handler in handlers)
+        {
+            var contract = handler.GetInterfaces().Single(type =>
+                type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IRequestHandler<,>));
+            var result = contract.GetGenericArguments()[1];
+            var resultTypes = result.IsGenericType ? result.GetGenericArguments() : new[] { result };
+            Assert.That(resultTypes.All(type => type.Assembly == application || type.IsPrimitive), Is.True,
+                $"{handler.Name} must return an Application result or a primitive, not an API/domain entity");
+        }
+        Assert.That(api.GetTypes().Any(type => type.GetInterfaces().Any(contract =>
+            contract.IsGenericType && contract.GetGenericTypeDefinition() == typeof(IRequestHandler<,>))), Is.False);
+        foreach (var controller in new[] { typeof(TasksController), typeof(TaskReportController), typeof(AccountMovementsController) })
+        {
+            Assert.That(controller.GetConstructors().Single().GetParameters().Select(parameter => parameter.ParameterType),
+                Is.EqualTo(new[] { typeof(ISender) }));
+        }
+
+        Assert.That(typeof(ITasksQueries).GetMethods().Any(method =>
+            method.GetParameters().Any(parameter => parameter.ParameterType.IsByRef)), Is.False);
+        Assert.That(typeof(ITasksQueries).GetMethods().Select(method => method.Name),
+            Has.None.EqualTo(nameof(ITasksCommands.AddAsync)));
+        Assert.That(typeof(TaskDto).GetProperty("Inclusion"), Is.Null);
     }
 
     [Test]
@@ -75,9 +126,9 @@ public class DataAccessBoundaryTests
         };
         repository.Reports.Add(report);
         using var cancellation = new CancellationTokenSource();
-        var service = new TaskReportService(repository);
-        var results = await service.GetWeeklyTaskReportAsync(
-            report.WeekStartDate.AddHours(12), report.WeekEndDate.AddHours(12), cancellation.Token);
+        var handler = new GetWeeklyTaskReportsQueryHandler(repository);
+        var results = await handler.Handle(new GetWeeklyTaskReportsQuery(
+            report.WeekStartDate.AddHours(12), report.WeekEndDate.AddHours(12)), cancellation.Token);
         Assert.That(repository.StartDate, Is.EqualTo(report.WeekStartDate));
         Assert.That(repository.EndDate, Is.EqualTo(report.WeekEndDate.AddDays(1).AddTicks(-1)));
         Assert.That(repository.Token, Is.EqualTo(cancellation.Token));
@@ -91,8 +142,8 @@ public class DataAccessBoundaryTests
     {
         var repository = new ReportRepositoryStub();
         using var cancellation = new CancellationTokenSource();
-        var service = new TaskReportService(repository);
-        var result = await service.InsertWeeklyTaskReportAsync(new WeeklyTaskReportModel
+        var handler = new InsertWeeklyTaskReportCommandHandler(repository);
+        var result = await handler.Handle(new InsertWeeklyTaskReportCommand
         {
             WeekStartDate = new DateTime(2026, 10, 5), WeekEndDate = new DateTime(2026, 10, 11),
             TotalTasks = 10, CompletedTasks = 8, PendingTasks = 2
@@ -106,11 +157,11 @@ public class DataAccessBoundaryTests
     public void InvalidWeeklyReportIsNotPersisted()
     {
         var repository = new ReportRepositoryStub();
-        var service = new TaskReportService(repository);
-        Assert.ThrowsAsync<ArgumentException>(() => service.InsertWeeklyTaskReportAsync(new WeeklyTaskReportModel
+        var handler = new InsertWeeklyTaskReportCommandHandler(repository);
+        Assert.ThrowsAsync<BusinessRuleException>(() => handler.Handle(new InsertWeeklyTaskReportCommand
         {
             TotalTasks = 1, CompletedTasks = 2
-        }));
+        }, CancellationToken.None));
         Assert.That(repository.Reports, Is.Empty);
     }
 
@@ -137,7 +188,7 @@ public class DataAccessBoundaryTests
     {
         var repository = new MovementRepositoryStub { Balance = 10 };
         var handler = new CreateMovementCommandHandler(repository, NullLogger<CreateMovementCommandHandler>.Instance);
-        Assert.ThrowsAsync<InvalidOperationException>(() => handler.Handle(
+        Assert.ThrowsAsync<BusinessRuleException>(() => handler.Handle(
             new CreateMovementCommand { UserId = Guid.NewGuid(), Amount = -11 }, CancellationToken.None));
         Assert.That(repository.Added, Is.Null);
     }

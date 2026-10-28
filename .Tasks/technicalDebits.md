@@ -59,12 +59,22 @@ Nao ha alteracao de schema nem migration necessaria para esta entrega.
 
 ### ORIGINAL-01 - fazer o swagger funcionar com o login
 
-Status: pendente de validacao ponta a ponta, nao de configuracao inicial.
+Status: concluido. Fluxo de login e chamada autenticada pelo Swagger validado
+no navegador pelo usuario em 27/10/2026.
+
+Corrigido o HTTP scheme do OpenAPI de `Bearer` para `bearer`, necessario para
+o Swagger enviar o header apos autorizar. As referencias de seguranca agora
+recebem o documento final; antes a exigencia era serializada sem `Bearer`.
+Teste de regressao verifica o scheme,
+a referencia `Bearer` na operacao protegida e login sem exigencia de token.
+Os 10 testes HTTP de CqrsApiTests passaram.
+Usuario confirmou o funcionamento apos a correcao: token obtido no login,
+autorizacao no Swagger e chamada ao endpoint protegido aceita.
 
 Ja existem definicao Bearer em
 [Program.cs](../TaskProjectApi/Program.cs), filtro de seguranca em
 [SwaggerBearerSecurityRequirementsOperationFilter.cs](../TaskProjectApi/Configuration/SwaggerBearerSecurityRequirementsOperationFilter.cs)
-e endpoint de login. Validar antes de adicionar outra solucao.
+e endpoint de login.
 
 Aceite:
 - Login valido retorna JWT; credencial invalida retorna 401.
@@ -76,15 +86,17 @@ Aceite:
 
 ### ORIGINAL-02 - fazer o react funcionar, esta dando erro de banco de dados na api
 
-Status: relato preservado; causa ainda nao diagnosticada.
+Status: concluido. Usuario confirmou o React funcionando em 27/10/2026 apos
+atualizar as configuracoes em appsettings. A resolucao relatada foi de
+configuracao; nao houve confirmacao de alteracoes de schema ou migrations.
 
-Separar conectividade do banco, migrations, autenticacao, URL da API e CORS.
-Em [Program.cs](../TaskProjectApi/Program.cs), as policies CORS sao configuradas
+Observacao tecnica independente da falha resolvida: em
+[Program.cs](../TaskProjectApi/Program.cs), as policies CORS sao configuradas
 de forma aninhada, aplicadas em dois middlewares e incluem uma origem com barra
 final. Simplificar para uma policy explicita por ambiente; isso nao prova nem
 corrige, por si so, uma falha de SQL Server.
 
-Aceite:
+Aceite original preservado como referencia para regressao:
 - Reproduzir a chamada diretamente na API e pelo React, registrando status,
   erro do servidor e identificador de correlacao, sem expor credenciais.
 - Validar a connection string efetiva do ambiente, acesso ao SQL Server e

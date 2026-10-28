@@ -134,6 +134,25 @@ ASP.NET Core Web API (.NET 10) providing REST endpoints for task management and 
 - Mapster 10.0
 - JWT Authentication
 
+### Using JWT authentication in Swagger
+
+1. Start the API in Development and open `/swagger`.
+2. Execute `POST /api/Login` with `user` and `password` for an existing local
+   database account. A successful response contains `token`; invalid credentials
+   return 401.
+3. Click **Authorize**, paste only the token value (no quotes or `Bearer `
+   prefix), authorize and close the dialog.
+4. Execute `GET /api/Tasks`. The generated curl must include
+   `Authorization: Bearer <token>`. Login alone does not authorize Swagger.
+
+The OpenAPI HTTP scheme must be lowercase `bearer` so Swagger attaches the
+header; the security definition/reference name remains `Bearer`. After changing
+the configuration, references must also resolve against the completed OpenAPI
+document or operation security requirements can be serialized as empty objects.
+Stop and restart the API/IIS Express, hard-refresh Swagger
+and authorize again. Tokens expire after one hour. Never share credentials or
+tokens in screenshots or logs.
+
 ### TaskListAngular
 
 Angular frontend application for task management and reporting.

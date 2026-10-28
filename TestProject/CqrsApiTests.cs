@@ -229,6 +229,15 @@ public class CqrsApiTests
 
         Assert.That(paths.GetProperty("/api/Tasks").GetProperty("get").GetProperty("security").GetArrayLength(),
             Is.EqualTo(1));
+        var bearer = root.GetProperty("components").GetProperty("securitySchemes").GetProperty("Bearer");
+        Assert.That(bearer.GetProperty("type").GetString(), Is.EqualTo("http"));
+        Assert.That(bearer.GetProperty("scheme").GetString(), Is.EqualTo("bearer"));
+        var requirement = paths.GetProperty("/api/Tasks").GetProperty("get").GetProperty("security")[0];
+        Assert.That(requirement.TryGetProperty("Bearer", out var scopes), Is.True);
+        Assert.That(scopes.GetArrayLength(), Is.Zero);
+        var login = paths.GetProperty("/api/Login").GetProperty("post");
+        Assert.That(!login.TryGetProperty("security", out var loginSecurity) ||
+            loginSecurity.GetArrayLength() == 0, Is.True);
         var schemas = root.GetProperty("components").GetProperty("schemas");
         Assert.That(schemas.GetProperty("CreateMovementRequest").GetProperty("properties")
             .EnumerateObject().Select(property => property.Name),

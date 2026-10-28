@@ -6,8 +6,14 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace TaskReportApi.Configuration;
 
-public sealed class SwaggerBearerSecurityRequirementsOperationFilter : IOperationFilter
+public sealed class SwaggerBearerSecurityRequirementsOperationFilter : IOperationFilter, IDocumentFilter
 {
+    public void Apply(OpenApiDocument document, DocumentFilterContext context)
+    {
+        // Security references must resolve against the completed document to be serialized.
+        document.SetReferenceHostDocument();
+    }
+
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
         var hasAuthorizeAttribute =

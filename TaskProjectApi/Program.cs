@@ -79,13 +79,14 @@ builder.Services.AddSwaggerGen(c =>
     {
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
-        Scheme = JwtBearerDefaults.AuthenticationScheme,
+        Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
         Description = "Paste the JWT token returned from the login endpoint."
     });
 
     c.OperationFilter<SwaggerBearerSecurityRequirementsOperationFilter>();
+    c.DocumentFilter<SwaggerBearerSecurityRequirementsOperationFilter>();
 });
 
 var app = builder.Build();

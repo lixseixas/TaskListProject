@@ -1,5 +1,5 @@
 ---
-name: cssharp
+name: c-sharp
 description: "Expert C# developer specializing in modern .NET development. Use for C#, .NET, ASP.NET Core, Blazor, Entity Framework, EF Core, Minimal API, MAUI, or SignalR implementation tasks."
 tools: [read, edit, search, execute, todo]
 user-invocable: true

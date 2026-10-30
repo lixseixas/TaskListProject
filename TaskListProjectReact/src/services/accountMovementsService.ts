@@ -1,3 +1,5 @@
+import { authUtils } from '../utils/auth';
+
 interface AccountMovement {
   id: string;
   userId: string;
@@ -28,6 +30,19 @@ export interface CreateMovementRequest {
   description: string | null;
 }
 
+const getAuthHeaders = () => {
+  const token = authUtils.getToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  return headers;
+};
+
 export const getAccountMovements = async (
   userId: string,
   page: number = 1,
@@ -35,7 +50,10 @@ export const getAccountMovements = async (
 ): Promise<AccountMovementsResponse> => {
   try {
     const response = await fetch(
-      `/api/AccountMovements/by-user/${userId}?page=${page}&pageSize=${pageSize}`
+      `/api/AccountMovements/by-user/${userId}?page=${page}&pageSize=${pageSize}`,
+      {
+        headers: getAuthHeaders(),
+      }
     );
 
     if (!response.ok) {
@@ -53,7 +71,10 @@ export const getAccountMovements = async (
 export const getAccountBalance = async (userId: string): Promise<AccountBalance> => {
   try {
     const response = await fetch(
-      `/api/AccountMovements/balance/${userId}`
+      `/api/AccountMovements/balance/${userId}`,
+      {
+        headers: getAuthHeaders(),
+      }
     );
 
     if (!response.ok) {
@@ -74,9 +95,7 @@ export const createAccountMovement = async (movement: CreateMovementRequest): Pr
       `/api/AccountMovements`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(movement),
       }
     );

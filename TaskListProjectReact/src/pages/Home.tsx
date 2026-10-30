@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { getAccountMovements, getAccountBalance, createAccountMovement } from '../services/accountMovementsService'
+import { authUtils } from '../utils/auth'
 import type { CreateMovementRequest } from '../services/accountMovementsService'
 import './Home.css'
 
@@ -21,13 +23,14 @@ interface AccountMovementsResponse {
 }
 
 function Home() {
+  const navigate = useNavigate();
   const [movements, setMovements] = useState<AccountMovementsResponse | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [balanceLoading, setBalanceLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   // Form state for new movement
   const [newAmount, setNewAmount] = useState('');
   const [newType, setNewType] = useState('Credit');
@@ -35,6 +38,18 @@ function Home() {
   const [submitting, setSubmitting] = useState(false);
 
   const userId = '785c2e15-8464-4cea-b30e-99faab345eb0'; // Test user ID
+
+  // Check authentication on mount
+  useEffect(() => {
+    if (!authUtils.isAuthenticated()) {
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  const handleLogout = () => {
+    authUtils.logout();
+    navigate('/login');
+  };
 
   const loadMovements = useCallback(async (page: number) => {
     try {
@@ -139,7 +154,12 @@ function Home() {
 
   return (
     <div className="app-container">
-      <h1>Account Movements</h1>
+      <div className="header">
+        <h1>Account Movements</h1>
+        <button onClick={handleLogout} className="logout-button">
+          Logout
+        </button>
+      </div>
       
       <div className="balance-container">
         <div className="balance-label">Current Balance</div>

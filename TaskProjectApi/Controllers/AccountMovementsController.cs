@@ -1,5 +1,6 @@
 using Mapster;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskListProject.Application.AccountMovements.Commands;
 using TaskListProject.Application.AccountMovements.Queries;
@@ -9,6 +10,7 @@ namespace TaskReportApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class AccountMovementsController(ISender sender) : ControllerBase
 {
     [HttpGet("by-user/{userId:guid}")]
